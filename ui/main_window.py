@@ -327,6 +327,8 @@ class MainWindow:
         # スタイルの設定
         style = ttk.Style()
         style.configure("Accent.TButton", foreground=self.colors["text_light"], background=self.colors["accent"])
+        # 太い進捗バーのスタイルを定義
+        style.configure("Thick.Horizontal.TProgressbar", thickness=25)  # 進捗バーを太く
         
         # メインフレーム
         self.main_frame = ttk.Frame(self.root, padding=20)
@@ -373,7 +375,7 @@ class MainWindow:
         # ファイルリストボックス
         self.files_listbox = tk.Listbox(
             self.files_frame,
-            height=8,
+            height=7,  # 高さを少し小さく調整
             selectmode=tk.EXTENDED,
             bg=self.colors["bg_secondary"],
             bd=1,
@@ -474,8 +476,8 @@ class MainWindow:
         )
         self.cancel_button.pack(side=tk.TOP, fill=tk.X, pady=10)
         
-        # 進捗表示フレーム
-        self.progress_frame = ttk.Frame(self.main_frame)
+        # 進捗表示フレーム - より目立つようにLabelFrameに変更
+        self.progress_frame = ttk.LabelFrame(self.main_frame, text="処理状況", padding=10)
         self.progress_frame.pack(fill=tk.X, pady=10)
         
         # 進捗ステータスラベル
@@ -486,12 +488,13 @@ class MainWindow:
         )
         self.status_label.pack(anchor=tk.W, pady=(0, 5))
         
-        # 進捗バー
+        # 進捗バー - 高さを大きくして目立たせる
         self.progress_bar = ttk.Progressbar(
             self.progress_frame,
             orient=tk.HORIZONTAL,
             length=100,
-            mode='determinate'
+            mode='determinate',
+            style='Thick.Horizontal.TProgressbar'  # 太いスタイルを適用
         )
         self.progress_bar.pack(fill=tk.X)
         
