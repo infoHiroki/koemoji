@@ -202,12 +202,12 @@ def main():
     
     # ウィンドウの設定
     root.title("コエモジ")
-    root.geometry("900x650")
+    root.geometry("950x650")  # 横幅を広げる
     root.configure(bg=COLORS["bg_primary"])
     
     # ウィンドウを画面中央に配置
     # ウィンドウサイズを取得
-    window_width = 900
+    window_width = 950  # 横幅を広げる
     window_height = 650
     # 画面サイズを取得
     screen_width = root.winfo_screenwidth()
