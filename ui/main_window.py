@@ -506,15 +506,7 @@ class MainWindow:
         )
         self.progress_bar.pack(fill=tk.X)
         
-        # ステータスバー
-        self.status_bar = ttk.Label(
-            self.root,
-            text="準備完了",
-            relief=tk.SUNKEN,
-            anchor=tk.W,
-            font=("游ゴシック", 12)  # フォントサイズをやや小さく調整
-        )
-        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+        # ステータスバーは不要なので削除
     
     def _load_settings(self):
         """設定を読み込む"""
@@ -537,8 +529,7 @@ class MainWindow:
             "large": "最高精度"
         }.get(model, model)
         
-        # ステータスバーに表示
-        self.status_bar.config(text=f"設定: モデル: {model_display}, 言語: {language_display}")
+        # ステータスバーは削除したので設定表示も不要
     
     def _add_files(self):
         """ファイルを追加"""
