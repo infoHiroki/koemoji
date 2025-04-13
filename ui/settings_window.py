@@ -163,28 +163,35 @@ class SettingsWindow:
             ("ru", "ロシア語")
         ]
         
+        # コンボボックスに表示する値：言語コードと表示名（ja:日本語, en:英語など）
+        combo_values = [f"{lang_value}:{lang_text}" for lang_value, lang_text in languages]
+        
         language_combo = ttk.Combobox(
             lang_frame,
             textvariable=self.lang_var,
-            values=[lang_text for lang_value, lang_text in languages],
+            values=combo_values,
             state="readonly",
             font=("游ゴシック", 12)  # フォントサイズをやや小さく調整
         )
         language_combo.pack(fill=tk.X, pady=5)
         
-        # 言語コードとテキスト表示のマッピング
-        self.lang_mapping = {lang_text: lang_value for lang_value, lang_text in languages}
-        self.lang_reverse_mapping = {lang_value: lang_text for lang_value, lang_text in languages}
-        
-        # 表示されている言語テキストを選択
+        # 初期選択を設定
         selected_lang = self.config.get("language", "ja")
-        language_combo.set(self.lang_reverse_mapping.get(selected_lang, "自動検出"))
+        selected_index = 0
+        for i, (code, _) in enumerate(languages):
+            if code == selected_lang:
+                selected_index = i
+                break
+        language_combo.current(selected_index)
         
         # コンボボックス選択時のイベント
         def on_language_selected(event):
-            selected_text = language_combo.get()
-            selected_code = self.lang_mapping.get(selected_text, "")
-            self.lang_var.set(selected_code)
+            selected = language_combo.get()
+            # "ja:日本語" から "ja" だけを取得
+            lang_code = selected.split(':', 1)[0]
+            self.lang_var.set(lang_code)
+        
+        language_combo.bind("<<ComboboxSelected>>", on_language_selected)
         
         language_combo.bind("<<ComboboxSelected>>", on_language_selected)
         
