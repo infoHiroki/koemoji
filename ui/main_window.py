@@ -334,33 +334,29 @@ class MainWindow:
         self.main_frame = ttk.Frame(self.root, padding=20)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
         
-        # ヘッダーフレーム - 全体的なレイアウト調整
+        # ヘッダーフレーム - 中央に縦並びで配置
         header_frame = ttk.Frame(self.main_frame)
         header_frame.pack(fill=tk.X, pady=(0, 5))
         
-        # ロゴ表示（リソースがある場合）- 左端に配置
+        # ロゴ表示（リソースがある場合）- 中央に配置
         logo_path = os.path.join("resources", "koemoji-logo.png")
         if os.path.exists(logo_path):
             try:
-                # ロゴ画像を読み込み（サイズを小さくする）
+                # ロゴ画像を読み込み
                 logo_img = Image.open(logo_path)
-                logo_img = logo_img.resize((80, 80), Image.LANCZOS)  # サイズを小さく
+                logo_img = logo_img.resize((80, 80), Image.LANCZOS)
                 self.logo_photo = ImageTk.PhotoImage(logo_img)
                 
-                # ロゴラベル - 左に配置
+                # ロゴラベル - 中央に配置
                 self.logo_label = ttk.Label(header_frame, image=self.logo_photo)
-                self.logo_label.pack(side=tk.LEFT, padx=10)
+                self.logo_label.pack(anchor=tk.CENTER, pady=(0, 5))
             except Exception as e:
                 print(f"ロゴ画像読み込みエラー: {e}")
-        
-        # タイトルと説明用のフレーム - 中央揃えに配置
-        text_frame = ttk.Frame(header_frame)
-        text_frame.pack(expand=True, fill=tk.BOTH)  # 拡張して中央に配置
         
         # タイトルラベル - 中央揃え
         title_font = ("游ゴシック", 16, "bold")
         self.title_label = ttk.Label(
-            text_frame, 
+            header_frame, 
             text="コエモジ - 音声・動画文字起こし",
             font=title_font
         )
@@ -369,7 +365,7 @@ class MainWindow:
         # 説明ラベル - 中央揃え
         desc_font = ("游ゴシック", 12)  # フォントサイズを小さく調整
         self.desc_label = ttk.Label(
-            text_frame,
+            header_frame,
             text="音声/動画ファイルから自動文字起こし - 対応: MP3, WAV, MP4, MOV, AVI など",
             font=desc_font,
             justify=tk.CENTER  # テキスト内部も中央揃え
@@ -463,26 +459,32 @@ class MainWindow:
         # アクセントボタン用のスタイル
         style.configure("LargeAccent.TButton", font=button_font, background=self.colors["accent"])
         
-        # 文字起こし開始ボタン
+        # ボタン用のフレーム - 横並び用
+        button_row_frame = ttk.Frame(self.process_frame)
+        button_row_frame.pack(fill=tk.X, pady=5)
+        
+        # 文字起こし開始ボタン - 左側に配置
         self.start_button = ttk.Button(
-            self.process_frame,
+            button_row_frame,
             text="文字起こし開始",
             command=self._start_processing,
             style="LargeAccent.TButton",  # 大きなフォントのアクセントスタイルを適用
-            padding=(12, 10)  # 内部パディングを少し小さく
+            padding=(12, 10),  # 内部パディングを少し小さく
+            width=20  # 幅を指定
         )
-        self.start_button.pack(side=tk.TOP, fill=tk.X, pady=5)
+        self.start_button.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
         
-        # キャンセルボタン（初期状態では無効）
+        # キャンセルボタン（初期状態では無効）- 右側に配置
         self.cancel_button = ttk.Button(
-            self.process_frame,
+            button_row_frame,
             text="キャンセル",
             command=self._cancel_processing,
             state=tk.DISABLED,
             style="LargeButton.TButton",  # 大きなフォントのスタイルを適用
-            padding=(12, 10)  # 内部パディングを少し小さく
+            padding=(12, 10),  # 内部パディングを少し小さく
+            width=15  # 幅を指定（文字起こし開始ボタンより少し小さく）
         )
-        self.cancel_button.pack(side=tk.TOP, fill=tk.X, pady=5)
+        self.cancel_button.pack(side=tk.RIGHT, fill=tk.X, expand=True, padx=(5, 0))
         
         # 進捗表示フレーム - パディングを小さく
         self.progress_frame = ttk.LabelFrame(self.main_frame, text="処理状況", padding=5)
