@@ -347,9 +347,13 @@ class MainWindow:
                 logo_img = logo_img.resize((80, 80), Image.LANCZOS)  # サイズを小さく
                 self.logo_photo = ImageTk.PhotoImage(logo_img)
                 
-                # ロゴラベル
-                self.logo_label = ttk.Label(header_frame, image=self.logo_photo)
-                self.logo_label.pack(side=tk.LEFT, padx=10)
+                # ロゴラベル - 垂直方向中央揃え用のフレームで包む
+                logo_frame = ttk.Frame(header_frame)
+                logo_frame.pack(side=tk.LEFT, padx=10, fill=tk.Y)
+                
+                # ロゴを配置して垂直方向中央に
+                self.logo_label = ttk.Label(logo_frame, image=self.logo_photo)
+                self.logo_label.pack(expand=True, fill=tk.BOTH)
             except Exception as e:
                 print(f"ロゴ画像読み込みエラー: {e}")
         
