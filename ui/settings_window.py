@@ -101,7 +101,7 @@ class SettingsWindow:
         # モデルの説明
         model_desc = ttk.Label(
             model_frame,
-            text="小さいモデルほど処理は速いですが、精度は下がります。大きいモデルほど精度は高いですが、メモリ使用量と処理時間が増加します。",
+            text="モデルサイズの選択ガイド：\n・tiny：短い音声や速度優先の場合、低スペックPCでの利用に適しています\n・base：一般的な会話や講義に最適なバランス\n・large：専門用語や複数話者、重要な会議録など高い精度が必要な場合（推奨）",
             justify=tk.LEFT,
             wraplength=550,
             font=("游ゴシック", 12)  # フォントサイズをやや小さく調整
@@ -115,11 +115,11 @@ class SettingsWindow:
         self.model_var = tk.StringVar(value=self.config.get("model", "tiny"))
         
         model_sizes = [
-            ("tiny", "最小 (処理速度優先)"),
-            ("base", "小"),
-            ("small", "標準"),
-            ("medium", "高精度"),
-            ("large", "最高精度 (最も遅い)")
+            ("tiny", "tiny (処理速度優先)"),
+            ("base", "base"),
+            ("small", "small"),
+            ("medium", "medium"),
+            ("large", "large (推奨)")
         ]
         
         for i, (model_value, model_text) in enumerate(model_sizes):
