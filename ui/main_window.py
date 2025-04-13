@@ -383,6 +383,9 @@ class MainWindow:
         )
         self.files_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
+        # リストボックスの選択が変更されたときのイベントをバインド
+        self.files_listbox.bind('<<ListboxSelect>>', self._on_files_select)
+        
         # スクロールバー
         self.files_scrollbar = ttk.Scrollbar(self.files_frame, command=self.files_listbox.yview)
         self.files_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
@@ -415,9 +418,22 @@ class MainWindow:
             command=self._remove_files,
             width=10,  # ボタン幅を大きく
             padding=(10, 8),  # 内部パディングを追加
-            style="LargeButton.TButton"  # 大きなフォントのスタイルを適用
+            style="LargeButton.TButton",  # 大きなフォントのスタイルを適用
+            state=tk.DISABLED  # 初期状態は無効
         )
         self.remove_button.pack(side=tk.LEFT, padx=8, pady=8)
+        
+        # すべて削除ボタン
+        self.remove_all_button = ttk.Button(
+            self.button_frame,
+            text="すべて削除",
+            command=self._remove_all_files,
+            width=12,  # ボタン幅を大きく
+            padding=(10, 8),  # 内部パディングを追加
+            style="LargeButton.TButton",  # 大きなフォントのスタイルを適用
+            state=tk.DISABLED  # 初期状態は無効
+        )
+        self.remove_all_button.pack(side=tk.LEFT, padx=8, pady=8)
         
         # 設定ボタン
         self.settings_button = ttk.Button(
@@ -537,6 +553,26 @@ class MainWindow:
                     self.files.append(file)
                     filename = os.path.basename(file)
                     self.files_listbox.insert(tk.END, filename)
+            
+            # ボタンの状態を更新
+            self._on_files_select()
+    
+    def _on_files_select(self, event=None):
+        """ファイルの選択状態が変わったときに呼び出される"""
+        # 選択されているファイルの数を取得
+        selected_count = len(self.files_listbox.curselection())
+        
+        # 削除ボタンの状態を更新
+        if selected_count > 0:
+            self.remove_button.config(state=tk.NORMAL)
+        else:
+            self.remove_button.config(state=tk.DISABLED)
+        
+        # すべて削除ボタンの状態を更新（ファイルが1つ以上あれば有効）
+        if len(self.files) > 0:
+            self.remove_all_button.config(state=tk.NORMAL)
+        else:
+            self.remove_all_button.config(state=tk.DISABLED)
     
     def _remove_files(self):
         """選択されたファイルを削除"""
@@ -547,10 +583,40 @@ class MainWindow:
         if not selected_indices:
             return
         
+        # 削除する件数
+        count = len(selected_indices)
+        
+        # 確認ダイアログを表示
+        confirm_message = f"選択された{count}件のファイルを削除しますか？"
+        if not messagebox.askyesno("確認", confirm_message):
+            return
+        
         # 選択されたファイルを削除（インデックスが変わるため、逆順で削除）
         for i in sorted(selected_indices, reverse=True):
             del self.files[i]
             self.files_listbox.delete(i)
+        
+        # ボタンの状態を更新
+        self._on_files_select()
+    
+    def _remove_all_files(self):
+        """すべてのファイルを削除"""
+        # ファイルがなければ何もしない
+        if not self.files:
+            return
+        
+        # 確認ダイアログを表示
+        count = len(self.files)
+        confirm_message = f"リスト内のすべてのファイル（{count}件）を削除しますか？"
+        if not messagebox.askyesno("確認", confirm_message):
+            return
+        
+        # すべてのファイルを削除
+        self.files.clear()
+        self.files_listbox.delete(0, tk.END)
+        
+        # ボタンの状態を更新
+        self._on_files_select()
     
     def _open_settings(self):
         """設定画面を開く"""
