@@ -334,34 +334,11 @@ class MainWindow:
         self.main_frame = ttk.Frame(self.root, padding=20)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
         
-        # ヘッダーフレーム（タイトル、ロゴ、説明を横に配置）
+        # ヘッダーフレーム（ロゴ、タイトル、説明を横に配置）
         header_frame = ttk.Frame(self.main_frame)
         header_frame.pack(fill=tk.X, pady=(0, 5))
         
-        # 左側のフレーム（タイトルと説明用）
-        left_frame = ttk.Frame(header_frame)
-        left_frame.pack(side=tk.LEFT, fill=tk.Y)
-        
-        # タイトルラベル
-        title_font = ("游ゴシック", 16, "bold")
-        self.title_label = ttk.Label(
-            left_frame, 
-            text="コエモジ - 音声・動画文字起こし",
-            font=title_font
-        )
-        self.title_label.pack(anchor=tk.W)
-        
-        # 説明ラベル
-        desc_font = ("游ゴシック", 12)  # フォントサイズを小さく調整
-        self.desc_label = ttk.Label(
-            left_frame,
-            text="音声/動画ファイルから自動文字起こし - 対応: MP3, WAV, MP4, MOV, AVI など",
-            font=desc_font,
-            justify=tk.LEFT
-        )
-        self.desc_label.pack(anchor=tk.W, pady=(5, 0))
-        
-        # ロゴ表示（リソースがある場合）
+        # ロゴ表示（リソースがある場合）- 左端に配置
         logo_path = os.path.join("resources", "koemoji-logo.png")
         if os.path.exists(logo_path):
             try:
@@ -372,9 +349,32 @@ class MainWindow:
                 
                 # ロゴラベル
                 self.logo_label = ttk.Label(header_frame, image=self.logo_photo)
-                self.logo_label.pack(side=tk.RIGHT, padx=10)
+                self.logo_label.pack(side=tk.LEFT, padx=10)
             except Exception as e:
                 print(f"ロゴ画像読み込みエラー: {e}")
+        
+        # タイトルと説明用のフレーム
+        text_frame = ttk.Frame(header_frame)
+        text_frame.pack(side=tk.LEFT, fill=tk.Y)
+        
+        # タイトルラベル
+        title_font = ("游ゴシック", 16, "bold")
+        self.title_label = ttk.Label(
+            text_frame, 
+            text="コエモジ - 音声・動画文字起こし",
+            font=title_font
+        )
+        self.title_label.pack(anchor=tk.W)
+        
+        # 説明ラベル
+        desc_font = ("游ゴシック", 12)  # フォントサイズを小さく調整
+        self.desc_label = ttk.Label(
+            text_frame,
+            text="音声/動画ファイルから自動文字起こし - 対応: MP3, WAV, MP4, MOV, AVI など",
+            font=desc_font,
+            justify=tk.LEFT
+        )
+        self.desc_label.pack(anchor=tk.W, pady=(5, 0))
         
         # ファイル一覧フレーム - パディングを小さくして余白を節約
         self.files_frame = ttk.LabelFrame(self.main_frame, text="ファイル一覧", padding=5)
