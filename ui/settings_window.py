@@ -77,7 +77,7 @@ class SettingsWindow:
         style = ttk.Style()
         
         # タブのフォントを大きくするスタイルを設定
-        style.configure("TNotebook.Tab", font=("游ゴシック", 14))  # タブのフォントサイズを14に設定
+        style.configure("TNotebook.Tab", font=("游ゴシック", 14), padding=[15, 5])  # タブのフォントサイズと内部余白を設定
         style.configure("TNotebook", tabmargins=[2, 5, 2, 0])  # タブのマージンを調整してクリック領域を広く
         
         # タブコントロールの作成
