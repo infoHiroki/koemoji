@@ -334,7 +334,7 @@ class MainWindow:
         self.main_frame = ttk.Frame(self.root, padding=20)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
         
-        # ヘッダーフレーム（ロゴ、タイトル、説明を横に配置）
+        # ヘッダーフレーム - 全体的なレイアウト調整
         header_frame = ttk.Frame(self.main_frame)
         header_frame.pack(fill=tk.X, pady=(0, 5))
         
@@ -347,38 +347,34 @@ class MainWindow:
                 logo_img = logo_img.resize((80, 80), Image.LANCZOS)  # サイズを小さく
                 self.logo_photo = ImageTk.PhotoImage(logo_img)
                 
-                # ロゴラベル - 上揃えに変更
-                logo_frame = ttk.Frame(header_frame)
-                logo_frame.pack(side=tk.LEFT, padx=10, fill=tk.Y)
-                
-                # ロゴを配置して上部に合わせる
-                self.logo_label = ttk.Label(logo_frame, image=self.logo_photo)
-                self.logo_label.pack(side=tk.TOP, anchor=tk.N)
+                # ロゴラベル - 左に配置
+                self.logo_label = ttk.Label(header_frame, image=self.logo_photo)
+                self.logo_label.pack(side=tk.LEFT, padx=10)
             except Exception as e:
                 print(f"ロゴ画像読み込みエラー: {e}")
         
-        # タイトルと説明用のフレーム - 上部揃えを明確に
+        # タイトルと説明用のフレーム - 中央揃えに配置
         text_frame = ttk.Frame(header_frame)
-        text_frame.pack(side=tk.LEFT, fill=tk.Y, anchor=tk.N)
+        text_frame.pack(expand=True, fill=tk.BOTH)  # 拡張して中央に配置
         
-        # タイトルラベル
+        # タイトルラベル - 中央揃え
         title_font = ("游ゴシック", 16, "bold")
         self.title_label = ttk.Label(
             text_frame, 
             text="コエモジ - 音声・動画文字起こし",
             font=title_font
         )
-        self.title_label.pack(anchor=tk.W)
+        self.title_label.pack(anchor=tk.CENTER)  # 中央揃え
         
-        # 説明ラベル
+        # 説明ラベル - 中央揃え
         desc_font = ("游ゴシック", 12)  # フォントサイズを小さく調整
         self.desc_label = ttk.Label(
             text_frame,
             text="音声/動画ファイルから自動文字起こし - 対応: MP3, WAV, MP4, MOV, AVI など",
             font=desc_font,
-            justify=tk.LEFT
+            justify=tk.CENTER  # テキスト内部も中央揃え
         )
-        self.desc_label.pack(anchor=tk.W, pady=(5, 0))
+        self.desc_label.pack(anchor=tk.CENTER, pady=(5, 0))  # 中央揃え
         
         # ファイル一覧フレーム - パディングを小さくして余白を節約
         self.files_frame = ttk.LabelFrame(self.main_frame, text="ファイル一覧", padding=5)
