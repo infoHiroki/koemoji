@@ -334,43 +334,51 @@ class MainWindow:
         self.main_frame = ttk.Frame(self.root, padding=20)
         self.main_frame.pack(fill=tk.BOTH, expand=True)
         
+        # ヘッダーフレーム（タイトル、ロゴ、説明を横に配置）
+        header_frame = ttk.Frame(self.main_frame)
+        header_frame.pack(fill=tk.X, pady=(0, 5))
+        
+        # 左側のフレーム（タイトルと説明用）
+        left_frame = ttk.Frame(header_frame)
+        left_frame.pack(side=tk.LEFT, fill=tk.Y)
+        
         # タイトルラベル
-        title_font = ("游ゴシック", 18, "bold")
+        title_font = ("游ゴシック", 16, "bold")
         self.title_label = ttk.Label(
-            self.main_frame, 
+            left_frame, 
             text="コエモジ - 音声・動画文字起こし",
             font=title_font
         )
-        self.title_label.pack(pady=10)
+        self.title_label.pack(anchor=tk.W)
+        
+        # 説明ラベル
+        desc_font = ("游ゴシック", 12)  # フォントサイズを小さく調整
+        self.desc_label = ttk.Label(
+            left_frame,
+            text="音声/動画ファイルから自動文字起こし - 対応: MP3, WAV, MP4, MOV, AVI など",
+            font=desc_font,
+            justify=tk.LEFT
+        )
+        self.desc_label.pack(anchor=tk.W, pady=(5, 0))
         
         # ロゴ表示（リソースがある場合）
         logo_path = os.path.join("resources", "koemoji-logo.png")
         if os.path.exists(logo_path):
             try:
-                # ロゴ画像を読み込み
+                # ロゴ画像を読み込み（サイズを小さくする）
                 logo_img = Image.open(logo_path)
-                logo_img = logo_img.resize((120, 120), Image.LANCZOS)
+                logo_img = logo_img.resize((80, 80), Image.LANCZOS)  # サイズを小さく
                 self.logo_photo = ImageTk.PhotoImage(logo_img)
                 
                 # ロゴラベル
-                self.logo_label = ttk.Label(self.main_frame, image=self.logo_photo)
-                self.logo_label.pack(pady=10)
+                self.logo_label = ttk.Label(header_frame, image=self.logo_photo)
+                self.logo_label.pack(side=tk.RIGHT, padx=10)
             except Exception as e:
                 print(f"ロゴ画像読み込みエラー: {e}")
         
-        # 説明ラベル
-        desc_font = ("游ゴシック", 13)  # フォントサイズをやや小さく調整
-        self.desc_label = ttk.Label(
-            self.main_frame,
-            text="音声ファイルや動画から自動的に文字起こしを行います。\n対応ファイル: MP3, WAV, MP4, MOV, AVI など",
-            font=desc_font,
-            justify=tk.CENTER
-        )
-        self.desc_label.pack(pady=10)
-        
-        # ファイル一覧フレーム
-        self.files_frame = ttk.LabelFrame(self.main_frame, text="ファイル一覧", padding=10)
-        self.files_frame.pack(fill=tk.BOTH, expand=True, pady=10)
+        # ファイル一覧フレーム - パディングを小さくして余白を節約
+        self.files_frame = ttk.LabelFrame(self.main_frame, text="ファイル一覧", padding=5)
+        self.files_frame.pack(fill=tk.BOTH, expand=True, pady=5)
         
         # ファイルリストボックス
         self.files_listbox = tk.Listbox(
@@ -393,9 +401,9 @@ class MainWindow:
         self.files_scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         self.files_listbox.config(yscrollcommand=self.files_scrollbar.set)
         
-        # ボタンフレーム
+        # ボタンフレーム - 余白を小さく
         self.button_frame = ttk.Frame(self.main_frame)
-        self.button_frame.pack(fill=tk.X, pady=10)
+        self.button_frame.pack(fill=tk.X, pady=5)
         
         # スタイルを作成して、ボタンのフォントを設定
         style = ttk.Style()
@@ -408,10 +416,10 @@ class MainWindow:
             text="ファイル追加",
             command=self._add_files,
             width=15,  # ボタン幅を大きく
-            padding=(10, 8),  # 内部パディングを追加
+            padding=(8, 6),  # 内部パディングを小さく
             style="LargeButton.TButton"  # 大きなフォントのスタイルを適用
         )
-        self.add_button.pack(side=tk.LEFT, padx=8, pady=8)
+        self.add_button.pack(side=tk.LEFT, padx=5, pady=5)
         
         # ファイル削除ボタン
         self.remove_button = ttk.Button(
@@ -419,11 +427,11 @@ class MainWindow:
             text="削除",
             command=self._remove_files,
             width=10,  # ボタン幅を大きく
-            padding=(10, 8),  # 内部パディングを追加
+            padding=(8, 6),  # 内部パディングを小さく
             style="LargeButton.TButton",  # 大きなフォントのスタイルを適用
             state=tk.DISABLED  # 初期状態は無効
         )
-        self.remove_button.pack(side=tk.LEFT, padx=8, pady=8)
+        self.remove_button.pack(side=tk.LEFT, padx=5, pady=5)
         
         # すべて削除ボタン
         self.remove_all_button = ttk.Button(
@@ -431,11 +439,11 @@ class MainWindow:
             text="すべて削除",
             command=self._remove_all_files,
             width=12,  # ボタン幅を大きく
-            padding=(10, 8),  # 内部パディングを追加
+            padding=(8, 6),  # 内部パディングを小さく
             style="LargeButton.TButton",  # 大きなフォントのスタイルを適用
             state=tk.DISABLED  # 初期状態は無効
         )
-        self.remove_all_button.pack(side=tk.LEFT, padx=8, pady=8)
+        self.remove_all_button.pack(side=tk.LEFT, padx=5, pady=5)
         
         # 設定ボタン
         self.settings_button = ttk.Button(
@@ -443,14 +451,14 @@ class MainWindow:
             text="設定",
             command=self._open_settings,
             width=10,  # ボタン幅を大きく
-            padding=(10, 8),  # 内部パディングを追加
+            padding=(8, 6),  # 内部パディングを小さく
             style="LargeButton.TButton"  # 大きなフォントのスタイルを適用
         )
-        self.settings_button.pack(side=tk.RIGHT, padx=8, pady=8)
+        self.settings_button.pack(side=tk.RIGHT, padx=5, pady=5)
         
-        # 処理ボタンフレーム
+        # 処理ボタンフレーム - 余白を小さく
         self.process_frame = ttk.Frame(self.main_frame)
-        self.process_frame.pack(fill=tk.X, pady=10)
+        self.process_frame.pack(fill=tk.X, pady=5)
         
         # アクセントボタン用のスタイル
         style.configure("LargeAccent.TButton", font=button_font, background=self.colors["accent"])
@@ -461,9 +469,9 @@ class MainWindow:
             text="文字起こし開始",
             command=self._start_processing,
             style="LargeAccent.TButton",  # 大きなフォントのアクセントスタイルを適用
-            padding=(15, 12)  # 内部パディングをさらに大きく
+            padding=(12, 10)  # 内部パディングを少し小さく
         )
-        self.start_button.pack(side=tk.TOP, fill=tk.X, pady=10)
+        self.start_button.pack(side=tk.TOP, fill=tk.X, pady=5)
         
         # キャンセルボタン（初期状態では無効）
         self.cancel_button = ttk.Button(
@@ -472,13 +480,13 @@ class MainWindow:
             command=self._cancel_processing,
             state=tk.DISABLED,
             style="LargeButton.TButton",  # 大きなフォントのスタイルを適用
-            padding=(15, 12)  # 内部パディングをさらに大きく
+            padding=(12, 10)  # 内部パディングを少し小さく
         )
-        self.cancel_button.pack(side=tk.TOP, fill=tk.X, pady=10)
+        self.cancel_button.pack(side=tk.TOP, fill=tk.X, pady=5)
         
-        # 進捗表示フレーム - より目立つようにLabelFrameに変更
-        self.progress_frame = ttk.LabelFrame(self.main_frame, text="処理状況", padding=10)
-        self.progress_frame.pack(fill=tk.X, pady=10)
+        # 進捗表示フレーム - パディングを小さく
+        self.progress_frame = ttk.LabelFrame(self.main_frame, text="処理状況", padding=5)
+        self.progress_frame.pack(fill=tk.X, pady=5)
         
         # 進捗ステータスラベル
         self.status_label = ttk.Label(
