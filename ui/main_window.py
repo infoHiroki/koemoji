@@ -347,19 +347,19 @@ class MainWindow:
                 logo_img = logo_img.resize((80, 80), Image.LANCZOS)  # サイズを小さく
                 self.logo_photo = ImageTk.PhotoImage(logo_img)
                 
-                # ロゴラベル - 垂直方向中央揃え用のフレームで包む
+                # ロゴラベル - 上揃えに変更
                 logo_frame = ttk.Frame(header_frame)
                 logo_frame.pack(side=tk.LEFT, padx=10, fill=tk.Y)
                 
-                # ロゴを配置して垂直方向中央に
+                # ロゴを配置して上部に合わせる
                 self.logo_label = ttk.Label(logo_frame, image=self.logo_photo)
-                self.logo_label.pack(expand=True, fill=tk.BOTH)
+                self.logo_label.pack(side=tk.TOP, anchor=tk.N)
             except Exception as e:
                 print(f"ロゴ画像読み込みエラー: {e}")
         
-        # タイトルと説明用のフレーム
+        # タイトルと説明用のフレーム - 上部揃えを明確に
         text_frame = ttk.Frame(header_frame)
-        text_frame.pack(side=tk.LEFT, fill=tk.Y)
+        text_frame.pack(side=tk.LEFT, fill=tk.Y, anchor=tk.N)
         
         # タイトルラベル
         title_font = ("游ゴシック", 16, "bold")
