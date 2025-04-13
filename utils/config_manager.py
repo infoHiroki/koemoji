@@ -139,7 +139,23 @@ class ConfigManager:
         Returns:
             str: 言語コード (None=自動検出)
         """
-        return self.config.get("language", "ja")
+        language = self.config.get("language", "ja")
+        
+        # 有効な言語コードのリスト
+        valid_codes = ["", "ja", "en", "zh", "ko", "es", "fr", "de", "it", "pt", "ru"]
+        
+        # もし言語が有効なコードでなければ、"ja"を返す
+        if language not in valid_codes:
+            # 逆変換を試みる（"日本語" → "ja"）
+            lang_mapping = {
+                "日本語": "ja", "英語": "en", "中国語": "zh", "韓国語": "ko",
+                "スペイン語": "es", "フランス語": "fr", "ドイツ語": "de",
+                "イタリア語": "it", "ポルトガル語": "pt", "ロシア語": "ru",
+                "自動検出": ""
+            }
+            language = lang_mapping.get(language, "ja")
+        
+        return language
     
     def set_language(self, language):
         """
