@@ -27,8 +27,8 @@ class SettingsWindow:
         # 設定ウィンドウの作成
         self.window = tk.Toplevel(parent)
         self.window.title("設定")
-        self.window.geometry("650x700")  # 縦幅をさらに増やす
-        self.window.minsize(650, 700)  # 最小サイズを設定
+        self.window.geometry("700x750")  # 横幅と縦幅をさらに増やす
+        self.window.minsize(700, 750)  # 最小サイズを設定
         self.window.resizable(True, True)  # リサイズ可能にする
         self.window.transient(parent)  # 親ウィンドウに対するモーダルダイアログとして設定
         self.window.grab_set()  # モーダルにする
@@ -103,7 +103,7 @@ class SettingsWindow:
             model_frame,
             text="モデルサイズの選択ガイド：\n・tiny：短い音声や速度優先の場合、低スペックPCでの利用に適しています\n・base：一般的な会話や講義に最適なバランス\n・large：専門用語や複数話者、重要な会議録など高い精度が必要な場合",
             justify=tk.LEFT,
-            wraplength=550,
+            wraplength=600,  # 横幅を広げる
             font=("游ゴシック", 12)  # フォントサイズをやや小さく調整
         )
         model_desc.pack(anchor=tk.W, pady=(0, 10))
@@ -141,7 +141,7 @@ class SettingsWindow:
             lang_frame,
             text="文字起こし対象の言語を指定します。特定の言語を指定すると精度が向上します。",
             justify=tk.LEFT,
-            wraplength=550,
+            wraplength=600,  # 横幅を広げる
             font=("游ゴシック", 12)  # フォントサイズをやや小さく調整
         )
         lang_desc.pack(anchor=tk.W, pady=(0, 10))
