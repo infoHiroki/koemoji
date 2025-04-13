@@ -1,0 +1,24 @@
+            # テキスト全体を書き込み
+            f.write(result["text"])
+            
+            # セグメント情報がある場合は詳細も書き込み
+            if "segments" in result and result["segments"]:
+                segments_count = len(result["segments"])
+                print(f"[INFO] 保存: {segments_count}個のセグメント情報を処理します")
+                
+                f.write("\n\n## 詳細タイムスタンプ\n\n")
+                for i, segment in enumerate(result["segments"]):
+                    try:
+                        # 必要なキーが存在するか確認
+                        if "start" in segment and "end" in segment and "text" in segment:
+                            start_time = self._format_time(segment["start"])
+                            end_time = self._format_time(segment["end"])
+                            f.write(f"[{start_time} --> {end_time}] {segment['text']}\n")
+                        else:
+                            # キーが存在しない場合のデバッグ情報
+                            keys = list(segment.keys())
+                            print(f"[WARNING] セグメント{i}に必要なキーがありません。利用可能なキー: {keys}")
+                    except Exception as e:
+                        print(f"[ERROR] セグメント{i}の処理中にエラー: {e}")
+            else:
+                print("[WARNING] 保存: セグメント情報がありません")

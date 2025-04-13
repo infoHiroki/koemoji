@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 """
-コエモジ∞ - 音声・動画文字起こしアプリケーション
+コエモジ - 音声・動画文字起こしアプリケーション
 OpenAI Whisperを使用して動画ファイルから音声を抽出し、自動的に文字起こしを行うデスクトップアプリケーション
 """
 
@@ -38,6 +38,25 @@ COLORS = {
     "border": "#E0E0E0",            # 標準ボーダー色（薄いグレー）
 }
 
+def find_app_icon():
+    """アプリケーションアイコンを探す"""
+    # 優先順位: 256x256 -> 48x48 -> 動的生成
+    
+    # 大きい方のアイコンを優先
+    icon_path_large = os.path.join("resources", "koemoji-logo256x256.ico")
+    if os.path.exists(icon_path_large):
+        print(f"大きいアイコンファイルを使用します: {icon_path_large}")
+        return icon_path_large
+    
+    # 小さい方のアイコン
+    icon_path_small = os.path.join("resources", "koemoji-logo48x48.ico")
+    if os.path.exists(icon_path_small):
+        print(f"小さいアイコンファイルを使用します: {icon_path_small}")
+        return icon_path_small
+    
+    # 既存のアイコンが見つからない場合は動的に生成
+    return create_app_icon()
+
 def create_app_icon():
     """アプリケーションアイコンを作成"""
     try:
@@ -48,9 +67,9 @@ def create_app_icon():
         
         # ロゴ画像の候補
         logo_paths = [
-            os.path.join("resources", "koemoji-infinity-logo.png"),  # 高解像度を優先
-            os.path.join("resources", "koemoji-infinity-logo-touka.png"),
-            os.path.join("resources", "koemoji-infinity-logo-48x48 px.png")
+            os.path.join("resources", "koemoji-logo.png"),  # 高解像度を優先
+            os.path.join("resources", "koemoji-logo-touka.png"),
+            os.path.join("resources", "koemoji-logo-48x48 px.png")
         ]
         
         # 使用可能なロゴを探す
@@ -127,11 +146,11 @@ def set_taskbar_icon():
     """Windows10/11のタスクバーアイコンを設定"""
     try:
         # アプリケーションIDを設定（これがタスクバーアイコン関連付けの鍵）
-        app_id = 'com.koemoji.infinity'
+        app_id = 'com.koemoji.app'
         ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(app_id)
         
         # アイコンファイルも設定
-        icon_path = create_app_icon()
+        icon_path = find_app_icon()
         if icon_path and os.path.exists(icon_path):
             # WinAPIを使用してアイコンを設定
             try:
@@ -172,8 +191,8 @@ def set_taskbar_icon():
 
 def main():
     """アプリケーションのメインエントリーポイント"""
-    # 事前にアイコンを作成
-    icon_path = create_app_icon()
+    # 事前にアイコンを取得
+    icon_path = find_app_icon()
     
     # 設定の読み込み
     config_manager = ConfigManager()
@@ -182,7 +201,7 @@ def main():
     root = tk.Tk()
     
     # ウィンドウの設定
-    root.title("コエモジ∞")
+    root.title("コエモジ")
     root.geometry("900x650")
     root.configure(bg=COLORS["bg_primary"])
     
@@ -199,9 +218,14 @@ def main():
     # ウィンドウの位置を設定
     root.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
     
+    # フォントサイズを調整
+    font_size = 12
+    
     # フォントの設定
-    default_font = ("游ゴシック", 12)
+    default_font = ("游ゴシック", font_size)
     root.option_add("*Font", default_font)
+    
+    print(f"フォントサイズ: 大 ({font_size}px)")
     
     # Windows固有のタスクバーアイコン設定
     set_taskbar_icon()
@@ -254,4 +278,4 @@ def main():
     root.mainloop()
 
 if __name__ == "__main__":
-    main() 
+    main()

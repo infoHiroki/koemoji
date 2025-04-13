@@ -18,10 +18,32 @@ whisper_path = os.path.join(os.path.dirname(__file__), "whisper-main")
 if whisper_path not in sys.path:
     sys.path.insert(0, whisper_path)
 
-# FFmpegの絶対パスを指定（環境変数が設定されていない場合に使用）
-FFMPEG_PATH = "ffmpeg"  # デフォルトはコマンド名のみ
-# Windowsの場合はFFmpegの絶対パスを指定することもできます
-# FFMPEG_PATH = r"C:\ffmpeg\bin\ffmpeg.exe"  # 必要に応じてコメントを外して正しいパスを設定
+# FFmpegのパスを取得
+def find_ffmpeg():
+    """FFmpegの実行ファイルのパスを検索"""
+    # アプリケーションディレクトリ内のffmpeg_binフォルダを確認
+    app_dir = os.path.dirname(os.path.abspath(__file__))
+    bin_dir_ffmpeg = os.path.join(app_dir, "ffmpeg_bin", "ffmpeg.exe")
+    if os.path.exists(bin_dir_ffmpeg):
+        print(f"同梱のFFmpegを使用します: {bin_dir_ffmpeg}")
+        return bin_dir_ffmpeg
+    
+    # PATHから検索
+    try:
+        import shutil
+        ffmpeg_path = shutil.which("ffmpeg")
+        if ffmpeg_path:
+            print(f"システムのFFmpegを使用します: {ffmpeg_path}")
+            return ffmpeg_path
+    except Exception as e:
+        print(f"FFmpeg検索エラー: {e}")
+    
+    # デフォルトのコマンド名を返す
+    print("FFmpegが見つからないため、デフォルトのコマンド名を使用します")
+    return "ffmpeg"
+
+# FFmpegの絶対パスを指定
+FFMPEG_PATH = find_ffmpeg()
 
 import whisper
 import torch
@@ -76,13 +98,25 @@ class BaseTranscriber:
             self.load_model()
         
         # 文字起こしオプション
-        options = {}
+        options = {
+            "verbose": False,  # 詳細出力を無効化（必要に応じて変更）
+            "word_timestamps": False,  # 単語単位のタイムスタンプは必要ない（処理速度向上のため）
+            "task": "transcribe",  # 文字起こしタスク
+        }
+        
+        # 言語設定がある場合は追加
         if self.language:
             options["language"] = self.language
         
         try:
             # 文字起こし実行
             result = self.model.transcribe(audio_path, **options)
+            
+            # デバッグ情報：segmentsキーが存在するか確認
+            if "segments" in result and result["segments"]:
+                print(f"[INFO] Segments found: {len(result['segments'])} segments")
+            else:
+                print("[WARNING] No segments found in transcription result")
             
             if self.callback:
                 self.callback(status="文字起こし完了", progress=90)
@@ -245,4 +279,4 @@ class AudioTranscriber(BaseTranscriber):
         except Exception as e:
             if self.callback:
                 self.callback(status=f"エラー: {str(e)}", progress=-1)
-            raise 
+            raise

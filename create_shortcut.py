@@ -85,7 +85,7 @@ def create_shortcut():
     desktop = winshell.desktop()
     
     # ショートカットの作成
-    shortcut_path = os.path.join(desktop, "コエモジ∞.lnk")
+    shortcut_path = os.path.join(desktop, "コエモジ.lnk")
     
     shell = Dispatch('WScript.Shell')
     shortcut = shell.CreateShortCut(shortcut_path)

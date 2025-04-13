@@ -47,7 +47,8 @@ class ConfigManager:
             "language": "ja",  # 日本語
             "output_format": "txt",
             "history": [],
-            "output_directory": os.path.join(os.path.expanduser("~/Desktop"), "コエモジ∞_文字起こし結果")
+            "font_size": "標準",
+            "output_directory": os.path.join(os.path.expanduser("~/Desktop"), "コエモジ_文字起こし結果")
         }
         
         # 設定ファイルのパスを確認
@@ -176,7 +177,7 @@ class ConfigManager:
         Returns:
             str: 出力ディレクトリのパス
         """
-        output_dir = self.config.get("output_directory", os.path.join(os.path.expanduser("~/Desktop"), "コエモジ∞_文字起こし結果"))
+        output_dir = self.config.get("output_directory", os.path.join(os.path.expanduser("~/Desktop"), "コエモジ_文字起こし結果"))
         
         # ディレクトリが存在しない場合は作成
         if not os.path.exists(output_dir):
@@ -233,6 +234,25 @@ class ConfigManager:
             list: 履歴リスト
         """
         return self.config.get("history", [])
+    
+    def get_font_size(self):
+        """
+        フォントサイズを取得
+        
+        Returns:
+            str: フォントサイズ設定 ("小", "標準", "大", "特大")
+        """
+        return self.config.get("font_size", "標準")
+    
+    def set_font_size(self, font_size):
+        """
+        フォントサイズを設定
+        
+        Args:
+            font_size (str): フォントサイズ設定 ("小", "標準", "大", "特大")
+        """
+        self.config["font_size"] = font_size
+        self.save_config()
 
     def update_config(self, new_config):
         """

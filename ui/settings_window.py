@@ -3,27 +3,12 @@
 
 """
 設定ウィンドウモジュール
-アプリケーションの設定画面を定義
+アプリケーションの設定を構成するためのウィンドウを実装
 """
 
 import os
 import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
-
-# モダンなカラーパレット定義
-COLORS = {
-    "bg_primary": "#FAFAFA",        # 背景色（ほぼ白）
-    "bg_secondary": "#FFFFFF",      # 白背景
-    "accent": "#2196F3",            # アクセント色（青）
-    "accent_hover": "#1976D2",      # ホバー時のアクセント色（濃い青）
-    "success": "#4CAF50",           # 成功色（緑）
-    "warning": "#FF9800",           # 警告色（オレンジ）
-    "error": "#F44336",             # エラー色（赤）
-    "text_primary": "#212121",      # 主要テキスト（黒に近いグレー）
-    "text_secondary": "#757575",    # 副次テキスト（ミディアムグレー）
-    "text_light": "#FFFFFF",        # 明るいテキスト（白）
-    "border": "#E0E0E0",            # 標準ボーダー色（薄いグレー）
-}
 
 class SettingsWindow:
     """設定ウィンドウクラス"""
@@ -39,392 +24,283 @@ class SettingsWindow:
         self.parent = parent
         self.config_manager = config_manager
         
-        # 設定ウィンドウを作成
+        # 設定ウィンドウの作成
         self.window = tk.Toplevel(parent)
-        self.window.title("コエモジ∞ - 設定")
-        self.window.geometry("520x550")  # 高さを小さくする
-        self.window.minsize(450, 550)    # 最小サイズも調整
-        self.window.transient(parent)
-        self.window.grab_set()
-        self.window.configure(bg=COLORS["bg_primary"])
+        self.window.title("設定")
+        self.window.geometry("650x700")  # 縦幅をさらに増やす
+        self.window.minsize(650, 700)  # 最小サイズを設定
+        self.window.resizable(True, True)  # リサイズ可能にする
+        self.window.transient(parent)  # 親ウィンドウに対するモーダルダイアログとして設定
+        self.window.grab_set()  # モーダルにする
         
-        # 親ウィンドウと同じアイコンを使用
-        try:
-            self.window.iconphoto(True, parent.iconphoto_master)
-        except Exception:
-            pass
-        
-        # ウィンドウを画面中央に配置
+        # 親ウィンドウの中央に配置
         self._center_window()
         
-        # スタイルの設定
-        self._setup_styles()
+        # 設定値を取得
+        self.config = self.config_manager.get_config()
         
-        # メインレイアウト作成
-        self._create_main_layout()
-        
-        # 初期設定を読み込み
-        self._load_settings()
+        # UIコンポーネントの初期化
+        self._init_ui()
     
-    def _setup_styles(self):
-        """スタイルの設定"""
+    def _center_window(self):
+        """ウィンドウを親ウィンドウの中央に配置"""
+        self.window.update_idletasks()
+        
+        parent_width = self.parent.winfo_width()
+        parent_height = self.parent.winfo_height()
+        parent_x = self.parent.winfo_x()
+        parent_y = self.parent.winfo_y()
+        
+        width = self.window.winfo_width()
+        height = self.window.winfo_height()
+        
+        x = parent_x + (parent_width - width) // 2
+        y = parent_y + (parent_height - height) // 2
+        
+        self.window.geometry(f"{width}x{height}+{x}+{y}")
+    
+    def _init_ui(self):
+        """UIコンポーネントの初期化"""
+        # メインフレーム
+        main_frame = ttk.Frame(self.window, padding=20)
+        main_frame.pack(fill=tk.BOTH, expand=True)
+        
+        # タイトルラベル
+        title_label = ttk.Label(
+            main_frame,
+            text="コエモジ 設定",
+            font=("游ゴシック", 16, "bold")
+        )
+        title_label.pack(pady=(0, 20))
+        
+        # スタイルの作成
         style = ttk.Style()
         
-        # 標準フォント定義
-        heading_font = ("游ゴシック", 13, "bold")  # フォントサイズを大きく
-        normal_font = ("游ゴシック", 12)          # フォントサイズを大きく
-        small_font = ("游ゴシック", 11)          # フォントサイズを大きく
+        # タブコントロールの作成
+        tab_control = ttk.Notebook(main_frame)
         
-        # フレームのスタイル
-        style.configure("TFrame", background=COLORS["bg_primary"])
-        style.configure("Card.TFrame", background=COLORS["bg_secondary"])
+        # タブ1: 文字起こし設定
+        tab_transcription = ttk.Frame(tab_control)
+        tab_control.add(tab_transcription, text="文字起こし設定")
         
-        # ラベルのスタイル
-        style.configure("TLabel", background=COLORS["bg_primary"], foreground=COLORS["text_primary"], font=normal_font)
-        style.configure("Header.TLabel", background=COLORS["bg_primary"], foreground=COLORS["text_primary"], font=heading_font)
-        style.configure("Card.TLabel", background=COLORS["bg_secondary"], foreground=COLORS["text_primary"], font=normal_font)
-        style.configure("CardHeader.TLabel", background=COLORS["bg_secondary"], foreground=COLORS["text_primary"], font=heading_font)
-        style.configure("Description.TLabel", background=COLORS["bg_primary"], foreground=COLORS["text_secondary"], font=small_font)
-
-        # コンボボックスのスタイル
-        style.configure("TCombobox", foreground=COLORS["text_primary"], font=normal_font)
-        style.map("TCombobox", fieldbackground=[("readonly", COLORS["bg_secondary"])])
+        # タブ2: 出力設定
+        tab_output = ttk.Frame(tab_control)
+        tab_control.add(tab_output, text="出力設定")
         
-        # エントリのスタイル
-        style.configure("TEntry", foreground=COLORS["text_primary"], font=normal_font)
-        style.map("TEntry", fieldbackground=[("readonly", COLORS["bg_secondary"])])
+        tab_control.pack(expand=True, fill=tk.BOTH)
         
-        # セパレータのスタイル
-        style.configure("TSeparator", background=COLORS["border"])
+        #---------- 文字起こし設定タブの内容 ----------
+        # モデル選択
+        model_frame = ttk.LabelFrame(tab_transcription, text="文字起こしモデル", padding=10)
+        model_frame.pack(fill=tk.X, pady=5)
         
-        # タブのスタイル設定
-        style.configure("TNotebook", background=COLORS["bg_primary"], borderwidth=0)
+        # モデルの説明
+        model_desc = ttk.Label(
+            model_frame,
+            text="小さいモデルほど処理は速いですが、精度は下がります。\n大きいモデルほど精度は高いですが、メモリ使用量と処理時間が増加します。",
+            justify=tk.LEFT,
+            wraplength=550,
+            font=("游ゴシック", 12)  # フォントサイズをやや小さく調整
+        )
+        model_desc.pack(anchor=tk.W, pady=(0, 10))
         
-        # タブのスタイル修正 - 非選択時は薄いグレー背景に黒文字、選択時も黒文字に変更
-        style.configure("TNotebook.Tab", 
-                        background=COLORS["border"],  # 非選択時は薄いグレー背景
-                        foreground=COLORS["text_primary"], 
-                        font=normal_font, 
-                        padding=[12, 6], 
-                        borderwidth=0)
-        
-        # タブマッピング - 選択時の文字色を黒に統一
-        style.map("TNotebook.Tab", 
-                  background=[("selected", COLORS["accent"]), 
-                              ("active", COLORS["border"])],  # アクティブ時は薄いグレー
-                  foreground=[("selected", COLORS["text_primary"]), 
-                              ("active", COLORS["text_primary"])],  # 全て黒文字に統一
-                  expand=[("selected", [1, 1, 1, 0])])
-
-    def _create_main_layout(self):
-        """メインレイアウトを作成"""
-        # メインコンテナ
-        self.main_frame = ttk.Frame(self.window, style="TFrame")
-        self.main_frame.pack(fill=tk.BOTH, expand=True, padx=20, pady=20)
-        
-        # タイトル
-        title_label = ttk.Label(self.main_frame, text="アプリケーション設定", style="Header.TLabel")
-        title_label.pack(anchor=tk.W, pady=(0, 15))
-        
-        # タブコントロールを作成
-        self.tab_control = ttk.Notebook(self.main_frame)
-        self.tab_control.pack(fill=tk.BOTH, expand=True)
-        
-        # タブページを作成
-        self.model_tab = ttk.Frame(self.tab_control, style="TFrame")
-        self.language_tab = ttk.Frame(self.tab_control, style="TFrame")
-        self.output_tab = ttk.Frame(self.tab_control, style="TFrame")
-        
-        # タブをタブコントロールに追加
-        self.tab_control.add(self.model_tab, text="モデル設定")
-        self.tab_control.add(self.language_tab, text="言語設定")
-        self.tab_control.add(self.output_tab, text="出力設定")
-        
-        # 各タブにコンテンツを作成
-        self._create_model_tab()
-        self._create_language_tab()
-        self._create_output_tab()
-        
-        # アクションボタン
-        self._create_action_buttons()
-    
-    def _create_model_tab(self):
-        """モデル設定タブの内容を作成"""
-        # コンテンツフレーム
-        content = ttk.Frame(self.model_tab, style="TFrame")
-        content.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+        # ラジオボタン用のフォントスタイルを作成
+        style.configure("LargeRadio.TRadiobutton", font=("游ゴシック", 14))
         
         # モデルサイズ選択
-        model_label = ttk.Label(content, text="モデルサイズ:", style="TLabel")
-        model_label.pack(anchor=tk.W, pady=(0, 5))
+        self.model_var = tk.StringVar(value=self.config.get("model", "tiny"))
         
-        # モデルサイズ選択コンボボックス
-        self.model_var = tk.StringVar()
-        model_combo = ttk.Combobox(content, textvariable=self.model_var, state="readonly", width=20)
-        model_combo["values"] = ["tiny", "base", "small", "medium", "large"]
-        model_combo.pack(fill=tk.X, pady=2)
+        model_sizes = [
+            ("tiny", "最小 (処理速度優先)"),
+            ("base", "小"),
+            ("small", "標準"),
+            ("medium", "高精度"),
+            ("large", "最高精度 (最も遅い)")
+        ]
         
-        # モデル説明
-        self.model_desc_var = tk.StringVar()
-        model_desc = ttk.Label(
-            content, 
-            textvariable=self.model_desc_var, 
-            wraplength=450, 
+        for i, (model_value, model_text) in enumerate(model_sizes):
+            model_radio = ttk.Radiobutton(
+                model_frame,
+                text=model_text,
+                value=model_value,
+                variable=self.model_var,
+                style="LargeRadio.TRadiobutton"  # 大きなフォントのスタイルを適用
+            )
+            model_radio.pack(anchor=tk.W, pady=4)  # 余白も少し大きく
+        
+        # 言語設定
+        lang_frame = ttk.LabelFrame(tab_transcription, text="言語設定", padding=10)
+        lang_frame.pack(fill=tk.X, pady=10)
+        
+        # 言語の説明
+        lang_desc = ttk.Label(
+            lang_frame,
+            text="文字起こし対象の言語を指定します。特定の言語を指定すると精度が向上します。",
             justify=tk.LEFT,
-            style="Description.TLabel"
+            wraplength=550,
+            font=("游ゴシック", 12)  # フォントサイズをやや小さく調整
         )
-        model_desc.pack(fill=tk.X, pady=(5, 0))
-        
-        # モデル選択変更時のイベント設定
-        model_combo.bind("<<ComboboxSelected>>", self._update_model_description)
-    
-    def _create_language_tab(self):
-        """言語設定タブの内容を作成"""
-        # コンテンツフレーム
-        content = ttk.Frame(self.language_tab, style="TFrame")
-        content.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+        lang_desc.pack(anchor=tk.W, pady=(0, 10))
         
         # 言語選択
-        lang_label = ttk.Label(content, text="文字起こしの言語:", style="TLabel")
-        lang_label.pack(anchor=tk.W, pady=(0, 5))
+        self.lang_var = tk.StringVar(value=self.config.get("language", "ja"))
         
-        # 言語選択コンボボックス
-        self.lang_var = tk.StringVar()
-        lang_combo = ttk.Combobox(content, textvariable=self.lang_var, width=20)
-        lang_options = [
-            ("自動検出", ""),
-            ("日本語", "ja"),
-            ("英語", "en"),
-            ("中国語", "zh"),
-            ("ドイツ語", "de"),
-            ("スペイン語", "es"),
-            ("ロシア語", "ru"),
-            ("韓国語", "ko"),
-            ("フランス語", "fr"),
-            ("ポルトガル語", "pt"),
-            ("トルコ語", "tr"),
-            ("ポーランド語", "pl"),
-            ("イタリア語", "it")
+        languages = [
+            ("", "自動検出"),
+            ("ja", "日本語"),
+            ("en", "英語"),
+            ("zh", "中国語"),
+            ("ko", "韓国語"),
+            ("es", "スペイン語"),
+            ("fr", "フランス語"),
+            ("de", "ドイツ語"),
+            ("it", "イタリア語"),
+            ("pt", "ポルトガル語"),
+            ("ru", "ロシア語")
         ]
-        lang_combo["values"] = [name for name, code in lang_options]
-        self.lang_options = {name: code for name, code in lang_options}
-        lang_combo.pack(fill=tk.X, pady=2)
         
-        # 言語説明
-        lang_desc = ttk.Label(
-            content,
-            text="文字起こしを行う言語を選択します。自動検出を選ぶと、WhisperがAIで言語を判定します。",
-            wraplength=450,
-            justify=tk.LEFT,
-            style="Description.TLabel"
+        language_combo = ttk.Combobox(
+            lang_frame,
+            textvariable=self.lang_var,
+            values=[lang_text for lang_value, lang_text in languages],
+            state="readonly",
+            font=("游ゴシック", 12)  # フォントサイズをやや小さく調整
         )
-        lang_desc.pack(fill=tk.X, pady=(5, 0))
-    
-    def _create_output_tab(self):
-        """出力設定タブの内容を作成"""
-        # コンテンツフレーム
-        content = ttk.Frame(self.output_tab, style="TFrame")
-        content.pack(fill=tk.BOTH, expand=True, padx=15, pady=15)
+        language_combo.pack(fill=tk.X, pady=5)
         
+        # 言語コードとテキスト表示のマッピング
+        self.lang_mapping = {lang_text: lang_value for lang_value, lang_text in languages}
+        self.lang_reverse_mapping = {lang_value: lang_text for lang_value, lang_text in languages}
+        
+        # 表示されている言語テキストを選択
+        selected_lang = self.config.get("language", "ja")
+        language_combo.set(self.lang_reverse_mapping.get(selected_lang, "自動検出"))
+        
+        # コンボボックス選択時のイベント
+        def on_language_selected(event):
+            selected_text = language_combo.get()
+            selected_code = self.lang_mapping.get(selected_text, "")
+            self.lang_var.set(selected_code)
+        
+        language_combo.bind("<<ComboboxSelected>>", on_language_selected)
+        
+        # この位置にはタブが減ったので、何もコードを入れません
+        
+        #---------- 出力設定タブの内容 ----------
         # 出力ディレクトリ
-        output_label = ttk.Label(content, text="文字起こし結果の出力先:", style="TLabel")
-        output_label.pack(anchor=tk.W, pady=(0, 5))
+        dir_frame = ttk.LabelFrame(tab_output, text="出力ディレクトリ", padding=10)
+        dir_frame.pack(fill=tk.X, pady=5)
         
-        # 出力ディレクトリ選択エリア
-        dir_frame = ttk.Frame(content, style="TFrame")
-        dir_frame.pack(fill=tk.X, pady=2)
-        
-        # 出力ディレクトリパス
-        self.output_dir_var = tk.StringVar()
-        output_entry = ttk.Entry(dir_frame, textvariable=self.output_dir_var)
-        output_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 5))
-        
-        # 参照ボタン
-        browse_button = tk.Button(
+        # 出力ディレクトリの説明
+        dir_desc = ttk.Label(
             dir_frame,
+            text="文字起こし結果の保存先を指定します。",
+            justify=tk.LEFT,
+            wraplength=550,
+            font=("游ゴシック", 12)  # フォントサイズをやや小さく調整
+        )
+        dir_desc.pack(anchor=tk.W, pady=(0, 10))
+        
+        # 出力ディレクトリ設定
+        dir_input_frame = ttk.Frame(dir_frame)
+        dir_input_frame.pack(fill=tk.X, pady=5)
+        
+        ttk.Label(dir_input_frame, text="ディレクトリ:", font=("游ゴシック", 12)).pack(side=tk.LEFT)
+        
+        self.output_dir_var = tk.StringVar(value=self.config.get("output_directory", ""))
+        output_dir_entry = ttk.Entry(dir_input_frame, textvariable=self.output_dir_var, width=50, font=("游ゴシック", 12))
+        output_dir_entry.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=5)
+        
+        browse_button = ttk.Button(
+            dir_input_frame,
             text="参照...",
             command=self._browse_output_dir,
-            bg=COLORS["accent"],
-            fg=COLORS["text_light"],
-            font=("游ゴシック", 9),
-            relief="flat",
-            borderwidth=0,
-            padx=8,
-            pady=2,
-            activebackground=COLORS["accent_hover"],
-            activeforeground=COLORS["text_light"]
+            style="Settings.LargeButton.TButton",  # 大きなフォントのスタイルを適用
+            padding=(8, 6)
         )
         browse_button.pack(side=tk.RIGHT)
         
-        # 出力説明
-        output_desc = ttk.Label(
-            content,
-            text="文字起こし結果のテキストファイルが保存されるフォルダを指定します。指定しない場合はデスクトップの「コエモジ∞_文字起こし結果」フォルダに保存されます。",
-            wraplength=450,
-            justify=tk.LEFT,
-            style="Description.TLabel"
-        )
-        output_desc.pack(fill=tk.X, pady=(5, 0))
-    
-    def _create_action_buttons(self):
-        """アクションボタンエリアを作成"""
-        button_frame = ttk.Frame(self.main_frame, style="TFrame")
-        button_frame.pack(fill=tk.X, pady=(15, 0))
+        # ボタンフレーム
+        button_frame = ttk.Frame(main_frame)
+        button_frame.pack(fill=tk.X, pady=10)
         
-        # キャンセルボタン
-        cancel_button = tk.Button(
-            button_frame,
-            text="キャンセル",
-            command=self.window.destroy,
-            bg=COLORS["bg_primary"],
-            fg=COLORS["text_primary"],
-            font=("游ゴシック", 10),
-            relief="solid",
-            borderwidth=1,
-            padx=10,
-            pady=5,
-            activebackground=COLORS["border"],
-            activeforeground=COLORS["text_primary"]
-        )
-        cancel_button.pack(side=tk.RIGHT, padx=(5, 0))
+        # ボタンのフォントを設定
+        button_font = ("游ゴシック", 14)  # ボタン用のフォントをやや小さく
+        style.configure("Settings.LargeButton.TButton", font=button_font)
         
         # 保存ボタン
-        save_button = tk.Button(
+        save_button = ttk.Button(
             button_frame,
             text="保存",
             command=self._save_settings,
-            bg=COLORS["accent"],
-            fg=COLORS["text_light"],
-            font=("游ゴシック", 10),
-            relief="flat",
-            borderwidth=0,
-            padx=15,
-            pady=5,
-            activebackground=COLORS["accent_hover"],
-            activeforeground=COLORS["text_light"]
+            width=15,
+            padding=(10, 8),
+            style="Settings.LargeButton.TButton"  # 大きなフォントのスタイルを適用
         )
-        save_button.pack(side=tk.RIGHT)
+        save_button.pack(side=tk.RIGHT, padx=10, pady=8)
+        
+        # キャンセルボタン
+        cancel_button = ttk.Button(
+            button_frame,
+            text="キャンセル",
+            command=self.window.destroy,
+            width=15,
+            padding=(10, 8),
+            style="Settings.LargeButton.TButton"  # 大きなフォントのスタイルを適用
+        )
+        cancel_button.pack(side=tk.RIGHT, padx=10, pady=8)
     
     def _browse_output_dir(self):
-        """出力ディレクトリ参照ダイアログを表示"""
+        """出力ディレクトリを選択"""
         current_dir = self.output_dir_var.get()
-        if current_dir and os.path.isdir(current_dir):
-            initial_dir = current_dir
-        else:
-            initial_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        # カレントディレクトリが存在しない場合はデスクトップを選択
+        if not os.path.exists(current_dir):
+            current_dir = os.path.expanduser("~/Desktop")
         
         # ディレクトリ選択ダイアログを表示
-        selected_dir = filedialog.askdirectory(
-            initialdir=initial_dir,
-            title="文字起こし結果の出力先を選択"
+        directory = filedialog.askdirectory(
+            title="出力ディレクトリを選択",
+            initialdir=current_dir
         )
         
-        if selected_dir:
-            self.output_dir_var.set(selected_dir)
-    
-    def _center_window(self):
-        """ウィンドウを画面中央に配置"""
-        # ウィンドウのサイズを取得
-        window_width = 520
-        window_height = 550  # 高さを小さく変更
-        
-        # 親ウィンドウの位置とサイズを取得
-        parent_x = self.parent.winfo_rootx()
-        parent_y = self.parent.winfo_rooty()
-        parent_width = self.parent.winfo_width()
-        parent_height = self.parent.winfo_height()
-        
-        # 親ウィンドウの中央に配置
-        center_x = parent_x + int((parent_width - window_width) / 2)
-        center_y = parent_y + int((parent_height - window_height) / 2)
-        
-        # 画面の範囲内に収める
-        screen_width = self.parent.winfo_screenwidth()
-        screen_height = self.parent.winfo_screenheight()
-        
-        # X座標が画面外にならないよう調整
-        if center_x + window_width > screen_width:
-            center_x = screen_width - window_width
-        if center_x < 0:
-            center_x = 0
-            
-        # Y座標が画面外にならないよう調整
-        if center_y + window_height > screen_height:
-            center_y = screen_height - window_height
-        if center_y < 0:
-            center_y = 0
-        
-        # ウィンドウの位置を設定
-        self.window.geometry(f"{window_width}x{window_height}+{center_x}+{center_y}")
-    
-    def _update_model_description(self, event=None):
-        """モデルサイズの説明を更新"""
-        model = self.model_var.get()
-        
-        descriptions = {
-            "tiny": "最小のモデル (約39M)。最速ですが精度は低めです。低スペックのPCやノートPCでも動作します。",
-            "base": "小さいモデル (約74M)。精度と速度のバランスが良好です。一般的な使用に適しています。",
-            "small": "中小モデル (約244M)。baseより精度が良く、一般的なPCで十分な速度で動作します。",
-            "medium": "中型モデル (約769M)。高い精度を提供し、ある程度のGPUスペックが必要です。",
-            "large": "最大のモデル (約1.5G)。最高の精度を提供しますが、高いGPUスペックが必要で処理時間も長くなります。"
-        }
-        
-        if model in descriptions:
-            self.model_desc_var.set(descriptions[model])
-        else:
-            self.model_desc_var.set("")
-    
-    def _load_settings(self):
-        """設定を読み込み"""
-        config = self.config_manager.get_config()
-        
-        # モデル設定
-        model = config.get("model", "medium")
-        self.model_var.set(model)
-        self._update_model_description()
-        
-        # 言語設定
-        language_code = config.get("language", "")
-        language_name = "自動検出"
-        
-        # コードから言語名を逆引き
-        for name, code in self.lang_options.items():
-            if code == language_code:
-                language_name = name
-                break
-        
-        self.lang_var.set(language_name)
-        
-        # 出力ディレクトリ
-        output_dir = config.get("output_directory", "output")
-        self.output_dir_var.set(output_dir)
+        # ディレクトリが選択された場合は設定を更新
+        if directory:
+            self.output_dir_var.set(directory)
     
     def _save_settings(self):
         """設定を保存"""
-        # 値を取得
+        # 設定値を取得
         model = self.model_var.get()
-        language_name = self.lang_var.get()
-        language_code = self.lang_options.get(language_name, "")
-        output_dir = self.output_dir_var.get()
+        language = self.lang_var.get()
+        output_directory = self.output_dir_var.get()
         
-        # 必須項目のチェック
-        if not model:
-            messagebox.showerror("エラー", "モデルサイズを選択してください。")
+        # 出力ディレクトリのチェック
+        if not output_directory:
+            messagebox.showerror("エラー", "出力ディレクトリを指定してください。")
             return
         
-        # 出力ディレクトリが指定されていない場合はデフォルト値を設定
-        if not output_dir:
-            output_dir = os.path.join(os.path.expanduser("~/Desktop"), "コエモジ∞_文字起こし結果")
+        # 出力ディレクトリが存在しない場合は確認
+        if not os.path.exists(output_directory):
+            if messagebox.askyesno("確認", f"指定された出力ディレクトリ「{output_directory}」が存在しません。\n作成しますか？"):
+                try:
+                    os.makedirs(output_directory)
+                except Exception as e:
+                    messagebox.showerror("エラー", f"ディレクトリの作成に失敗しました: {e}")
+                    return
+            else:
+                return
         
         # 設定を更新
-        config = {
-            "model": model,
-            "language": language_code,
-            "output_directory": output_dir
-        }
+        self.config_manager.set_model(model)
+        self.config_manager.set_language(language)
+        self.config_manager.set_output_directory(output_directory)
         
         # 設定を保存
-        self.config_manager.update_config(config)
+        self.config_manager.save_config()
         
-        # ダイアログを閉じる
-        self.window.destroy() 
+        # 保存成功メッセージ
+        messagebox.showinfo("設定を保存しました", "設定を保存しました。")
+        
+        # ウィンドウを閉じる
+        self.window.destroy()
