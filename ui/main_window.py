@@ -339,7 +339,8 @@ class MainWindow:
         header_frame.pack(fill=tk.X, pady=(0, 5))
         
         # ロゴ表示（リソースがある場合）- 中央に配置
-        logo_path = os.path.join("resources", "koemoji-logo.png")
+        # 正しいファイル名を使用
+        logo_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "resources", "koemoji-logo256x256.png")
         if os.path.exists(logo_path):
             try:
                 # ロゴ画像を読み込み

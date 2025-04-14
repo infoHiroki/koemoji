@@ -21,9 +21,18 @@ if whisper_path not in sys.path:
 # FFmpegのパスを取得
 def find_ffmpeg():
     """FFmpegの実行ファイルのパスを検索"""
-    # アプリケーションディレクトリ内のffmpeg_binフォルダを確認
+    # アプリケーションディレクトリを取得
     app_dir = os.path.dirname(os.path.abspath(__file__))
-    bin_dir_ffmpeg = os.path.join(app_dir, "ffmpeg_bin", "ffmpeg.exe")
+    base_dir = os.path.dirname(app_dir)  # ベースディレクトリ（親）
+    
+    # アプリケーションディレクトリ内のffmpeg_binフォルダを確認 (古い構造)
+    app_bin_dir_ffmpeg = os.path.join(app_dir, "ffmpeg_bin", "ffmpeg.exe")
+    if os.path.exists(app_bin_dir_ffmpeg):
+        print(f"同梱のFFmpegを使用します: {app_bin_dir_ffmpeg}")
+        return app_bin_dir_ffmpeg
+    
+    # 新しい階層構造でのFFmpegバイナリを確認
+    bin_dir_ffmpeg = os.path.join(base_dir, "bin", "ffmpeg_bin", "ffmpeg.exe")
     if os.path.exists(bin_dir_ffmpeg):
         print(f"同梱のFFmpegを使用します: {bin_dir_ffmpeg}")
         return bin_dir_ffmpeg

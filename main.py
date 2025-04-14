@@ -67,9 +67,8 @@ def create_app_icon():
         
         # ロゴ画像の候補
         logo_paths = [
-            os.path.join("resources", "koemoji-logo.png"),  # 高解像度を優先
-            os.path.join("resources", "koemoji-logo-touka.png"),
-            os.path.join("resources", "koemoji-logo-48x48 px.png")
+            os.path.join("resources", "koemoji-logo256x256"),  # 高解像度を優先
+            os.path.join("resources", "koemoji-logo48x48.png")
         ]
         
         # 使用可能なロゴを探す
@@ -242,7 +241,7 @@ def main():
                 print(f"iconbitmapエラー: {e}")
         
         # 方法2: Tkinterの標準的な方法
-        logo_path = "resources/koemoji-infinity-logo-48x48 px.png"
+        logo_path = "resources/koemoji-logo-48x48 px.png"
         if os.path.exists(logo_path):
             try:
                 icon_img = Image.open(logo_path)
@@ -257,7 +256,7 @@ def main():
                 # ファイル名にスペースがある場合の代替処理
                 try:
                     # 代替ロゴを使用
-                    alt_logo_path = "resources/koemoji-infinity-logo.png"
+                    alt_logo_path = "resources/koemoji-logo256x256.png"
                     if os.path.exists(alt_logo_path):
                         icon_img = Image.open(alt_logo_path)
                         # 適切なサイズにリサイズ
