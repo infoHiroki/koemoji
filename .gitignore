@@ -23,13 +23,60 @@ var/
 # Virtual Environment
 venv/
 ENV/
+.env/
+.venv/
+env/
+venv/
+ENV/
 
 # IDE
 .idea/
 .vscode/
 *.swp
 *.swo
+*~
+.DS_Store
+.vs/
 
 # Application specific
 config.json
-*.log 
+*.log
+logs/
+whisper_cache/
+*.bak
+*_backup.*
+
+# Archive folder
+archive/
+
+# Whisper model directories
+models/
+
+# Temporary files
+.temp/
+temp/
+tmp/
+
+# FFmpeg downloaded binaries
+# ffmpeg_bin/
+
+# OS specific
+Thumbs.db
+.DS_Store
+ehthumbs.db
+desktop.ini
+
+# Debug files
+debug.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Distribution
+dist/
+build/
+*.exe
+*.msi
+*.zip
