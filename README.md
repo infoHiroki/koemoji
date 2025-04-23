@@ -15,6 +15,7 @@ koemoji/
 ├── config.json          # 設定ファイル（モデルサイズ、保存先など）
 ├── icon.ico             # アプリケーションアイコン
 ├── koemoji.bat          # 起動用バッチファイル
+├── LICENSE              # MITライセンスファイル
 └── README.md            # 説明ドキュメント
 ```
 
