@@ -20,7 +20,8 @@ koemoji/
 ├── main.py              # メインアプリケーション（すべての機能を含む）
 ├── config.json          # 設定ファイル（モデルサイズ、保存先など）
 ├── icon.ico             # アプリケーションアイコン
-├── koemoji.bat          # 起動用バッチファイル
+├── koemoji.bat          # 起動用バッチファイル（Windows）
+├── koemoji.bat          # 起動用シェルスクリプト（Mac）
 ├── LICENSE              # MITライセンスファイル
 └── README.md            # 説明ドキュメント
 ```
@@ -79,7 +80,7 @@ koemoji/
 
 1. プロジェクトフォルダを適切な場所に配置します（例：`C:\Program Files\Koemoji`または`C:\Users\ユーザー名\Documents\Koemoji`）
 
-### ショートカットの作成
+### ショートカットの作成（Windows）
 
 1. `koemoji.bat`ファイルを右クリックし、「ショートカットの作成」を選択します
 2. 作成されたショートカットをデスクトップなど任意の場所に移動させます
