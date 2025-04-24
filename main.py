@@ -65,7 +65,7 @@ class KoemojiApp:
         """アプリケーションの初期化"""
         self.root = root
         self.root.title("Koemoji - シンプル文字起こしツール")
-        self.root.geometry("800x650")
+        self.root.geometry("1000x750")
         
         # アイコンの設定（存在する場合）
         icon_path = Path(__file__).parent / "icon.ico"
@@ -206,10 +206,10 @@ class KoemojiApp:
         # 現在のファイル進捗（パルスモードで表示）
         ttk.Label(progress_frame, text="現在の処理:").pack(side=tk.LEFT, padx=(0, 5))
         self.progress_var = tk.DoubleVar(value=0.0)
-        self.progress_bar = ttk.Progressbar(progress_frame, mode='indeterminate', length=300)
+        self.progress_bar = ttk.Progressbar(progress_frame, mode='indeterminate', length=280)
         self.progress_bar.pack(side=tk.LEFT, fill=tk.X, expand=True)
         self.progress_percent_var = tk.StringVar(value="")
-        ttk.Label(progress_frame, textvariable=self.progress_percent_var, width=5).pack(side=tk.LEFT, padx=5)
+        ttk.Label(progress_frame, textvariable=self.progress_percent_var, width=8).pack(side=tk.LEFT, padx=5)
 
         # 実行ボタン
         button_frame = ttk.Frame(main_frame)
