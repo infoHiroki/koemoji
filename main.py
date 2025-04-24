@@ -523,16 +523,16 @@ class KoemojiApp:
                 if text:
                     f.write(f"[{start_time} -> {end_time}] {text}\n")
                 
-                # 進捗状況の更新
+                # 進捗状況の更新（内部での進捗バー表示用）
                 progress = min(100, int((i + 1) / estimated_segments * 100))
                 self.progress_var.set(progress)
                 self.progress_percent_var.set(f"{progress}%")
                 
-                # 定期的にステータス更新
-                if (i + 1) % 10 == 0 or (i + 1) == estimated_segments or i == 0:
-                    self.update_status(f"ファイル: {os.path.basename(input_file)} - 進捗: {progress}% ({i + 1}/{estimated_segments}セグメント)")
+                # 定期的にステータス更新（セグメント数の比率表示をやめて単純化）
+                if (i + 1) % 10 == 0 or i == 0:
+                    self.update_status(f"ファイル: {os.path.basename(input_file)} - 処理中: セグメント {i + 1}")
 
-        self.update_status(f"ファイル {os.path.basename(input_file)} の文字起こしが完了しました。")
+        self.update_status(f"ファイル {os.path.basename(input_file)} の文字起こしが完了しました。(合計 {i + 1} セグメント処理)")
         # 最後のファイルなら完了メッセージを表示するだけ（自動で開く機能は削除）
 
     def format_time(self, seconds: float) -> str:
