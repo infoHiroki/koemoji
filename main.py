@@ -203,12 +203,12 @@ class KoemojiApp:
         self.file_progress_var = tk.StringVar(value="0/0")
         ttk.Label(progress_frame, textvariable=self.file_progress_var).pack(side=tk.LEFT, padx=(0, 10))
         
-        # 現在のファイル進捗
+        # 現在のファイル進捗（パルスモードで表示）
         ttk.Label(progress_frame, text="現在の処理:").pack(side=tk.LEFT, padx=(0, 5))
         self.progress_var = tk.DoubleVar(value=0.0)
-        self.progress_bar = ttk.Progressbar(progress_frame, variable=self.progress_var, maximum=100, length=300)
+        self.progress_bar = ttk.Progressbar(progress_frame, mode='indeterminate', length=300)
         self.progress_bar.pack(side=tk.LEFT, fill=tk.X, expand=True)
-        self.progress_percent_var = tk.StringVar(value="0%")
+        self.progress_percent_var = tk.StringVar(value="")
         ttk.Label(progress_frame, textvariable=self.progress_percent_var, width=5).pack(side=tk.LEFT, padx=5)
 
         # 実行ボタン
@@ -448,6 +448,10 @@ class KoemojiApp:
                 self.file_progress_var.set(f"{processed_files}/{total_files}")
                 
                 try:
+                    # プログレスバーのパルスを開始
+                    self.progress_bar.start()
+                    self.progress_percent_var.set("処理中")
+                    
                     self.transcribe_file(input_file, output_dir)
                 except Exception as e:
                     self.update_status(f"ファイル処理中にエラーが発生しました: {os.path.basename(input_file)} - {e}")
@@ -469,11 +473,9 @@ class KoemojiApp:
         
         finally:
             self.processing_files = False
-            # プログレスバーを確定モードにリセット
-            self.progress_bar.config(mode='determinate')
+            # パルスを停止
             self.progress_bar.stop()
-            self.progress_var.set(0)
-            self.progress_percent_var.set("0%")
+            self.progress_percent_var.set("停止")
 
     def transcribe_file(self, input_file: str, output_dir: str):
         """単一ファイルの文字起こし処理"""
@@ -526,34 +528,15 @@ class KoemojiApp:
                 if text:
                     f.write(f"[{start_time} -> {end_time}] {text}\n")
                 
-                # 進捗状況の更新（内部での進捗バー表示用）
-                progress = min(100, int((i + 1) / estimated_segments * 100))
-                
-                # 進捗が100%に達したらパルスモードに切り替える
-                if progress >= 100:
-                    # プログレスバーを不定モードに設定
-                    self.progress_bar.config(mode='indeterminate')
-                    # パルスを開始
-                    self.progress_bar.start()
-                    # テキスト表示も変更
-                    self.progress_percent_var.set("処理中")
-                else:
-                    # 通常の確定モード
-                    self.progress_bar.config(mode='determinate')
-                    self.progress_bar.stop()  # 念のためパルスを停止
-                    # 通常のパーセンテージ表示
-                    self.progress_var.set(progress)
-                    self.progress_percent_var.set(f"{progress}%")
+                # 進捗表示は行わない（パルスモードで常に処理中表示）
                 
                 # 定期的にステータス更新（セグメント数の比率表示をやめて単純化）
                 if (i + 1) % 10 == 0 or i == 0:
                     self.update_status(f"ファイル: {os.path.basename(input_file)} - 処理中: セグメント {i + 1}")
 
-        # 処理完了時にプログレスバーを確定モードに戻し、100%表示に
-        self.progress_bar.config(mode='determinate')
+        # 処理完了時にパルスを停止
         self.progress_bar.stop()
-        self.progress_var.set(100)
-        self.progress_percent_var.set("100%")
+        self.progress_percent_var.set("完了")
         
         self.update_status(f"ファイル {os.path.basename(input_file)} の文字起こしが完了しました。(合計 {i + 1} セグメント処理)")
         # 最後のファイルなら完了メッセージを表示するだけ（自動で開く機能は削除）
@@ -570,11 +553,9 @@ class KoemojiApp:
             self.cancel_flag = True
             self.update_status("キャンセル中...（現在の処理が完了するまでお待ちください）")
             
-            # プログレスバーを確定モードにリセット
-            self.progress_bar.config(mode='determinate')
+            # パルスを停止
             self.progress_bar.stop()
-            self.progress_var.set(0)
-            self.progress_percent_var.set("0%")
+            self.progress_percent_var.set("")
             
             # キューをクリア
             with self.file_queue.mutex:
