@@ -1,4 +1,7 @@
 
+# ユーザー固有の設定ファイル
+config.json
+
 # Python キャッシュファイル
 __pycache__/
 *.py[cod]
@@ -18,3 +21,6 @@ ENV/
 # OS固有のファイル
 .DS_Store
 Thumbs.db
+
+
+config.json
