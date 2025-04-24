@@ -1,5 +1,3 @@
-# ユーザー固有の設定ファイル
-config.json
 
 # Python キャッシュファイル
 __pycache__/

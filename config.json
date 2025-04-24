@@ -1,0 +1,6 @@
+{
+    "model_size": "tiny",
+    "language": "ja",
+    "output_dir": "",
+    "compute_type": "int8"
+}
