@@ -67,6 +67,9 @@ class KoemojiApp:
         self.root.title("Koemoji - シンプル文字起こしツール")
         self.root.geometry("1000x750")
         
+        # ウィンドウを画面中央少し上に配置
+        self.center_window_slightly_above()
+        
         # アイコンの設定（存在する場合）
         icon_path = Path(__file__).parent / "icon.ico"
         if icon_path.exists():
@@ -88,6 +91,27 @@ class KoemojiApp:
         
         # UI構築
         self.build_ui()
+        
+    def center_window_slightly_above(self):
+        """ウィンドウを画面中央少し上に配置"""
+        # 画面サイズ取得
+        screen_width = self.root.winfo_screenwidth()
+        screen_height = self.root.winfo_screenheight()
+        
+        # ウィンドウサイズ取得
+        window_width = 1000
+        window_height = 750
+        
+        # 中央少し上の位置を計算
+        x = (screen_width - window_width) // 2
+        y = (screen_height - window_height) // 2 - 100  # 中央より100ピクセル上
+        
+        # 位置が負にならないよう調整
+        if y < 0:
+            y = 0
+            
+        # 位置を設定
+        self.root.geometry(f"{window_width}x{window_height}+{x}+{y}")
 
     def load_config(self) -> Dict[str, Any]:
         """設定ファイルの読み込み"""
