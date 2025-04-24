@@ -1,6 +1,0 @@
-{
-    "model_size": "large",
-    "language": "ja",
-    "output_dir": "C:/Users/xxxhi/Downloads",
-    "compute_type": "int8"
-}
