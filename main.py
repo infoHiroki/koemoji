@@ -540,13 +540,11 @@ class KoemojiApp:
                     return
 
                 # セグメント情報の書き込み
-                start_time = self.format_time(segment.start)
-                end_time = self.format_time(segment.end)
                 text = segment.text.strip()
                 
                 # 空のテキストはスキップ
                 if text:
-                    f.write(f"[{start_time} -> {end_time}] {text}\n")
+                    f.write(f"{text}\n")
                 
                 # 進捗表示は行わない（パルスモードで常に処理中表示）
                 
