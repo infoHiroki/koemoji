@@ -161,10 +161,10 @@ class KoemojiApp:
         file_buttons_frame = ttk.Frame(file_list_frame)
         file_buttons_frame.pack(fill=tk.Y, side=tk.RIGHT, padx=5)
         
-        ttk.Button(file_buttons_frame, text="ファイル追加", command=self.browse_files).pack(pady=2)
-        ttk.Button(file_buttons_frame, text="フォルダから追加", command=self.browse_folder).pack(pady=2)
-        ttk.Button(file_buttons_frame, text="選択削除", command=self.remove_selected_files).pack(pady=2)
-        ttk.Button(file_buttons_frame, text="全削除", command=self.clear_files).pack(pady=2)
+        ttk.Button(file_buttons_frame, text="📂 ファイル追加", command=self.browse_files).pack(pady=2)
+        ttk.Button(file_buttons_frame, text="📁 フォルダから追加", command=self.browse_folder).pack(pady=2)
+        ttk.Button(file_buttons_frame, text="🗑️ 選択削除", command=self.remove_selected_files).pack(pady=2)
+        ttk.Button(file_buttons_frame, text="🧹 全削除", command=self.clear_files).pack(pady=2)
 
         # 設定セクション
         settings_frame = ttk.LabelFrame(main_frame, text="設定", padding="10")
@@ -196,7 +196,7 @@ class KoemojiApp:
         ttk.Label(settings_frame, text="出力先:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
         self.output_dir_var = tk.StringVar(value=self.config["output_dir"])
         ttk.Entry(settings_frame, textvariable=self.output_dir_var, width=50).grid(row=1, column=1, columnspan=2, sticky=tk.EW, padx=5, pady=5)
-        ttk.Button(settings_frame, text="変更...", command=self.browse_output_dir).grid(row=1, column=3, sticky=tk.W, padx=5, pady=5)
+        ttk.Button(settings_frame, text="📂 変更...", command=self.browse_output_dir).grid(row=1, column=3, sticky=tk.W, padx=5, pady=5)
         
         # 出力先が変更されたときに設定を更新するバインド
         self.output_dir_var.trace_add("write", lambda name, index, mode: self.update_config("output_dir", self.output_dir_var.get()))
@@ -235,12 +235,12 @@ class KoemojiApp:
         button_frame = ttk.Frame(main_frame)
         button_frame.pack(fill=tk.X, pady=5)
 
-        ttk.Button(button_frame, text="文字起こし開始", command=self.start_transcription).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="キャンセル", command=self.cancel_transcription).pack(side=tk.LEFT, padx=5)
-        ttk.Button(button_frame, text="終了", command=self.root.destroy).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(button_frame, text="🎙️ 文字起こし開始", command=self.start_transcription).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="⛔ キャンセル", command=self.cancel_transcription).pack(side=tk.LEFT, padx=5)
+        ttk.Button(button_frame, text="🚪 終了", command=self.root.destroy).pack(side=tk.RIGHT, padx=5)
 
         # 初期メッセージ
-        self.update_status("ファイルを選択して「文字起こし開始」ボタンをクリックしてください。")
+        self.update_status("🎵 ファイルを選択して「文字起こし開始」ボタンをクリックしてください。")
 
     def update_status(self, message: str):
         """ステータスメッセージの更新"""
@@ -261,7 +261,7 @@ class KoemojiApp:
             for filepath in filepaths:
                 if filepath not in self.get_all_files():
                     self.file_listbox.insert(tk.END, filepath)
-            self.update_status(f"{len(filepaths)}個のファイルを追加しました。")
+            self.update_status(f"📥 {len(filepaths)}個のファイルを追加しました。")
 
     def browse_folder(self):
         """フォルダ内の音声/動画ファイルを追加"""
@@ -282,9 +282,9 @@ class KoemojiApp:
                         count += 1
         
         if count > 0:
-            self.update_status(f"フォルダから{count}個のメディアファイルを追加しました。")
+            self.update_status(f"📁 フォルダから{count}個のメディアファイルを追加しました。")
         else:
-            self.update_status("フォルダ内にサポートされているメディアファイルが見つかりませんでした。")
+            self.update_status("❓ フォルダ内にサポートされているメディアファイルが見つかりませんでした。")
 
     def get_all_files(self) -> List[str]:
         """リストボックス内のすべてのファイルを取得"""
@@ -300,13 +300,13 @@ class KoemojiApp:
         for i in sorted(selected_indices, reverse=True):
             self.file_listbox.delete(i)
         
-        self.update_status(f"{len(selected_indices)}個のファイルをリストから削除しました。")
+        self.update_status(f"🗑️ {len(selected_indices)}個のファイルをリストから削除しました。")
 
     def clear_files(self):
         """ファイルリストを全てクリア"""
         if self.file_listbox.size() > 0:
             self.file_listbox.delete(0, tk.END)
-            self.update_status("ファイルリストをクリアしました。")
+            self.update_status("🧹 ファイルリストをクリアしました。")
 
     def browse_output_dir(self):
         """出力先ディレクトリを選択するダイアログを表示"""
@@ -341,7 +341,7 @@ class KoemojiApp:
             current_model_size = getattr(self.model, "_model_size", None) if self.model else None
             
             if self.model is None or current_model_size != self.config["model_size"]:
-                self.update_status(f"モデル '{self.config['model_size']}' をロード中...")
+                self.update_status(f"🔄 モデル '{self.config['model_size']}' をロード中...")
                 
                 # CPUの場合はint8、CUDAが利用可能ならfloat16を使用
                 compute_type = self.config["compute_type"]
@@ -350,14 +350,14 @@ class KoemojiApp:
                 # CPUでfloat16を指定された場合はint8に自動変換
                 if device == "cpu" and compute_type == "float16":
                     compute_type = "int8"
-                    self.update_status("CPUでの実行のため、計算タイプをint8に自動変更しました。")
+                    self.update_status("ℹ️ CPUでの実行のため、計算タイプをint8に自動変更しました。")
                 
                 self.model = WhisperModel(
                     model_size_or_path=self.config["model_size"],
                     device=device,
                     compute_type=compute_type
                 )
-                self.update_status(f"モデル '{self.config['model_size']}' のロードが完了しました。({device}、{compute_type})")
+                self.update_status(f"✅ モデル '{self.config['model_size']}' のロードが完了しました。({device}、{compute_type})")
             return True
         except Exception as e:
             self.update_status(f"モデルのロードエラー: {e}")
@@ -429,14 +429,14 @@ class KoemojiApp:
                 self.file_queue.put(file)
                 file_count += 1
             else:
-                self.update_status(f"警告: ファイルが見つかりません: {file}")
+                self.update_status(f"⚠️ 警告: ファイルが見つかりません: {file}")
                 
         if file_count == 0:
             messagebox.showinfo("情報", "処理するファイルがありません。")
             return
         
         self.file_progress_var.set(f"0/{file_count}")
-        self.update_status(f"{file_count}個のファイルの処理を開始します。")
+        self.update_status(f"🚀 {file_count}個のファイルの処理を開始します。")
 
         # 処理スレッドの開始
         self.transcription_thread = threading.Thread(
@@ -474,20 +474,20 @@ class KoemojiApp:
                     
                     self.transcribe_file(input_file, output_dir)
                 except Exception as e:
-                    self.update_status(f"ファイル処理中にエラーが発生しました: {os.path.basename(input_file)} - {e}")
+                    self.update_status(f"❌ ファイル処理中にエラーが発生しました: {os.path.basename(input_file)} - {e}")
                     logger.exception(f"ファイル処理中にエラー: {input_file}")
                 
                 # ファイルキューのタスク完了を通知
                 self.file_queue.task_done()
             
             if self.cancel_flag:
-                self.update_status("処理がキャンセルされました。")
+                self.update_status("🛑 処理がキャンセルされました。")
             else:
-                self.update_status("すべてのファイルの処理が完了しました。")
-                messagebox.showinfo("完了", "すべてのファイルの文字起こしが完了しました。")
+                self.update_status("🎉 すべてのファイルの処理が完了しました。")
+                messagebox.showinfo("✅ 完了", "🎉 すべてのファイルの文字起こしが完了しました。")
         
         except Exception as e:
-            self.update_status(f"処理中にエラーが発生しました: {e}")
+            self.update_status(f"❌ 処理中にエラーが発生しました: {e}")
             logger.exception("ファイルキュー処理中にエラーが発生しました")
             messagebox.showerror("エラー", f"処理中にエラーが発生しました: {e}")
         
@@ -505,16 +505,16 @@ class KoemojiApp:
         # Windowsのパス区切り文字を統一
         output_file = os.path.normpath(os.path.join(output_dir, f"{base_name}_{timestamp}.txt"))
 
-        self.update_status(f"文字起こし開始: {os.path.basename(input_file)}")
-        self.update_status(f"出力先: {output_file}")
+        self.update_status(f"🎙️ 文字起こし開始: {os.path.basename(input_file)}")
+        self.update_status(f"📄 出力先: {output_file}")
 
         # 言語設定の取得
         language = self.config["language"]
         if language == "auto":
             language = None  # Whisperの自動検出を使用
-            self.update_status("言語は自動検出を使用します。")
+            self.update_status("🔍 言語は自動検出を使用します。")
         else:
-            self.update_status(f"言語設定: {language}")
+            self.update_status(f"🗣️ 言語設定: {language}")
 
         # 文字起こしの実行
         segments, info = self.model.transcribe(
@@ -536,7 +536,7 @@ class KoemojiApp:
         with open(output_file, "w", encoding="utf-8") as f:
             for i, segment in enumerate(segments):
                 if self.cancel_flag:
-                    self.update_status(f"ファイル {os.path.basename(input_file)} の処理がキャンセルされました。")
+                    self.update_status(f"🛑 ファイル {os.path.basename(input_file)} の処理がキャンセルされました。")
                     return
 
                 # セグメント情報の書き込み
@@ -550,13 +550,13 @@ class KoemojiApp:
                 
                 # 定期的にステータス更新（セグメント数の比率表示をやめて単純化）
                 if (i + 1) % 10 == 0 or i == 0:
-                    self.update_status(f"ファイル: {os.path.basename(input_file)} - 処理中: セグメント {i + 1}")
+                    self.update_status(f"⏳ ファイル: {os.path.basename(input_file)} - 処理中: セグメント {i + 1}")
 
         # 処理完了時にパルスを停止
         self.progress_bar.stop()
         self.progress_percent_var.set("完了")
         
-        self.update_status(f"ファイル {os.path.basename(input_file)} の文字起こしが完了しました。(合計 {i + 1} セグメント処理)")
+        self.update_status(f"✅ ファイル {os.path.basename(input_file)} の文字起こしが完了しました。(合計 {i + 1} セグメント処理)")
         # 最後のファイルなら完了メッセージを表示するだけ（自動で開く機能は削除）
 
     def format_time(self, seconds: float) -> str:
@@ -569,7 +569,7 @@ class KoemojiApp:
         """文字起こし処理をキャンセル"""
         if self.transcription_thread and self.transcription_thread.is_alive():
             self.cancel_flag = True
-            self.update_status("キャンセル中...（現在の処理が完了するまでお待ちください）")
+            self.update_status("⏳ キャンセル中...（現在の処理が完了するまでお待ちください）")
             
             # パルスを停止
             self.progress_bar.stop()
@@ -579,7 +579,7 @@ class KoemojiApp:
             with self.file_queue.mutex:
                 self.file_queue.queue.clear()
         else:
-            self.update_status("キャンセルする処理がありません。")
+            self.update_status("ℹ️ キャンセルする処理がありません。")
 
     # open_fileメソッドを削除
 
