@@ -3,24 +3,54 @@
 config.json
 folder_watcher/folder_watcher_config.json
 folder_watcher/auto_transcriber_config.json
+folder_watcher/*.log
 
 # Python キャッシュファイル
 __pycache__/
 *.py[cod]
 *$py.class
+.pytest_cache/
 
 # 仮想環境
 venv/
 env/
 ENV/
+.env
+.venv
 
 # Whisperモデルファイル（自動的にダウンロードされる）
 *.pt
+models/
+**/cache/
+**/cached/
 
 # ログファイル
 *.log
+logs/
+
+# 一時ファイル
+tmp/
+temp/
+.temp/
+*.tmp
+*.bak
+*.swp
+
+# ビルド関連
+build/
+dist/
+*.egg-info/
+*.egg
+
+# IDE関連
+.idea/
+.vscode/
+*.sublime-*
+.project
+.pydevproject
 
 # OS固有のファイル
 .DS_Store
 Thumbs.db
+desktop.ini
 **/.claude/settings.local.json
