@@ -1,6 +1,8 @@
 
 # ユーザー固有の設定ファイル
 config.json
+folder_watcher/folder_watcher_config.json
+folder_watcher/auto_transcriber_config.json
 
 # Python キャッシュファイル
 __pycache__/
@@ -21,3 +23,4 @@ ENV/
 # OS固有のファイル
 .DS_Store
 Thumbs.db
+**/.claude/settings.local.json
