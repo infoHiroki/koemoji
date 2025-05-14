@@ -78,10 +78,21 @@ class KoemojiApp:
         # ウィンドウを画面中央に配置
         self.center_window()
         
-        # アイコンの設定（存在する場合）
-        icon_path = Path(__file__).parent / "icon.ico"
-        if icon_path.exists():
-            self.root.iconbitmap(str(icon_path))
+        # アイコンの設定（OS別に適切な方法で）
+        if sys.platform == "darwin":  # macOS
+            icon_path = Path(__file__).parent / "icon.png"
+            if icon_path.exists():
+                img = tk.PhotoImage(file=str(icon_path))
+                self.root.iconphoto(True, img)
+        elif os.name == "nt":  # Windows
+            icon_path = Path(__file__).parent / "icon.ico"
+            if icon_path.exists():
+                self.root.iconbitmap(str(icon_path))
+        else:  # Linux その他
+            icon_path = Path(__file__).parent / "icon.png"
+            if icon_path.exists():
+                img = tk.PhotoImage(file=str(icon_path))
+                self.root.iconphoto(True, img)
         
         # 設定の読み込み
         self.config = self.load_config()
