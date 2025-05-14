@@ -73,7 +73,7 @@ class KoemojiApp:
         """アプリケーションの初期化"""
         self.root = root
         self.root.title("Koemoji - シンプル文字起こしツール")
-        self.root.geometry("1000x750")
+        self.root.geometry("1200x850")
         
         # ウィンドウを画面中央に配置
         self.center_window()
@@ -129,8 +129,8 @@ class KoemojiApp:
         screen_height = self.root.winfo_screenheight()
         
         # ウィンドウサイズ取得
-        window_width = 1000
-        window_height = 750
+        window_width = 1200
+        window_height = 850
         
         # 中央位置を計算
         x = (screen_width - window_width) // 2
@@ -189,7 +189,7 @@ class KoemojiApp:
         file_list_frame_inner.pack(fill=tk.BOTH, expand=True, side=tk.LEFT)
 
         # リストボックスとスクロールバー
-        self.file_listbox = tk.Listbox(file_list_frame_inner, height=5, selectmode=tk.EXTENDED)
+        self.file_listbox = tk.Listbox(file_list_frame_inner, height=8, selectmode=tk.EXTENDED)
         self.file_listbox.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
         
         file_scrollbar = ttk.Scrollbar(file_list_frame_inner, orient=tk.VERTICAL, command=self.file_listbox.yview)
@@ -274,7 +274,7 @@ class KoemojiApp:
         status_frame.pack(fill=tk.BOTH, expand=True, pady=5)
 
         # ステータステキスト
-        self.status_text = tk.Text(status_frame, height=10, width=70, wrap=tk.WORD, state=tk.DISABLED)
+        self.status_text = tk.Text(status_frame, height=15, width=80, wrap=tk.WORD, state=tk.DISABLED)
         self.status_text.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
 
         # スクロールバー
