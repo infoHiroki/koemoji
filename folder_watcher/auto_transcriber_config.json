@@ -1,0 +1,14 @@
+{
+    "input_directory": "",
+    "output_directory": "",
+    "supported_extensions": [
+        ".mp3",
+        ".mp4",
+        ".wav",
+        ".m4a",
+        ".avi",
+        ".mov",
+        ".wmv",
+        ".flac"
+    ]
+}
