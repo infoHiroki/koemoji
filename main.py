@@ -32,6 +32,12 @@ except ImportError:
                         "pip install faster-whisper を実行してインストールしてください。")
     sys.exit(1)
 
+# フォルダ監視モジュール
+try:
+    from folder_watcher.folder_watcher import FolderWatcher
+except ImportError:
+    print("警告: folder_watcherモジュールが見つかりません。フォルダ監視機能は無効になります。")
+
 # ロガーの設定
 logging.basicConfig(
     level=logging.INFO,
@@ -88,6 +94,12 @@ class KoemojiApp:
         
         # 処理スレッド
         self.transcription_thread = None
+        
+        # フォルダ監視関連
+        self.folder_watcher = None
+        self.watcher_enabled = False
+        self.watcher_config_path = Path(__file__).parent / "folder_watcher" / "folder_watcher_config.json"
+        self.auto_transcriber_config_path = Path(__file__).parent / "folder_watcher" / "auto_transcriber_config.json"
         
         # UI構築
         self.build_ui()
@@ -200,6 +212,31 @@ class KoemojiApp:
         
         # 出力先が変更されたときに設定を更新するバインド
         self.output_dir_var.trace_add("write", lambda name, index, mode: self.update_config("output_dir", self.output_dir_var.get()))
+        
+        # フォルダ監視セクション
+        watcher_frame = ttk.LabelFrame(main_frame, text="フォルダ監視", padding="10")
+        watcher_frame.pack(fill=tk.X, pady=5)
+        
+        # 監視ディレクトリ選択
+        ttk.Label(watcher_frame, text="監視フォルダ:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+        self.watch_dir_var = tk.StringVar(value="")
+        ttk.Entry(watcher_frame, textvariable=self.watch_dir_var, width=50).grid(row=0, column=1, columnspan=2, sticky=tk.EW, padx=5, pady=5)
+        ttk.Button(watcher_frame, text="📂 選択...", command=self.browse_watch_dir).grid(row=0, column=3, sticky=tk.W, padx=5, pady=5)
+        
+        # 監視状態インジケータ
+        ttk.Label(watcher_frame, text="監視状態:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+        self.watch_status_var = tk.StringVar(value="停止中")
+        ttk.Label(watcher_frame, textvariable=self.watch_status_var).grid(row=1, column=1, sticky=tk.W, padx=5, pady=5)
+        
+        # 監視制御ボタン
+        button_frame = ttk.Frame(watcher_frame)
+        button_frame.grid(row=1, column=2, columnspan=2, sticky=tk.E, padx=5, pady=5)
+        
+        self.start_watch_button = ttk.Button(button_frame, text="▶️ 監視開始", command=self.start_folder_watcher)
+        self.start_watch_button.pack(side=tk.LEFT, padx=5)
+        
+        self.stop_watch_button = ttk.Button(button_frame, text="⏹️ 監視停止", command=self.stop_folder_watcher, state=tk.DISABLED)
+        self.stop_watch_button.pack(side=tk.LEFT, padx=5)
 
         # ステータス表示
         status_frame = ttk.LabelFrame(main_frame, text="状態", padding="10")
@@ -557,7 +594,16 @@ class KoemojiApp:
         self.progress_percent_var.set("完了")
         
         self.update_status(f"✅ ファイル {os.path.basename(input_file)} の文字起こしが完了しました。(合計 {i + 1} セグメント処理)")
-        # 最後のファイルなら完了メッセージを表示するだけ（自動で開く機能は削除）
+        
+        # フォルダ監視モジュールに処理完了を通知（監視から検出されたファイルの場合）
+        if self.watcher_enabled and self.folder_watcher:
+            try:
+                self.folder_watcher.mark_file_as_processed(input_file, {
+                    "output_file": output_file,
+                    "status": "success"
+                })
+            except Exception as e:
+                logger.error(f"フォルダ監視への処理結果通知エラー: {e}")
 
     def format_time(self, seconds: float) -> str:
         """秒数を[HH:MM:SS.mmm]形式に変換"""
@@ -581,13 +627,152 @@ class KoemojiApp:
         else:
             self.update_status("ℹ️ キャンセルする処理がありません。")
 
-    # open_fileメソッドを削除
+    # フォルダ監視関連の機能
+    def browse_watch_dir(self):
+        """監視フォルダを選択するダイアログを表示"""
+        directory = filedialog.askdirectory(initialdir=self.watch_dir_var.get() or os.path.expanduser("~"))
+        if directory:
+            self.watch_dir_var.set(directory)
+            self.update_status(f"📁 監視フォルダを '{directory}' に設定しました。")
+    
+    def start_folder_watcher(self):
+        """フォルダ監視を開始"""
+        watch_dir = self.watch_dir_var.get()
+        if not watch_dir:
+            messagebox.showerror("エラー", "監視フォルダを選択してください。")
+            return
+        
+        if not os.path.exists(watch_dir):
+            try:
+                os.makedirs(watch_dir, exist_ok=True)
+                self.update_status(f"📁 監視フォルダ '{watch_dir}' を作成しました。")
+            except Exception as e:
+                messagebox.showerror("エラー", f"監視フォルダの作成に失敗しました: {e}")
+                return
+        
+        # すでに監視中の場合は警告
+        if self.watcher_enabled and self.folder_watcher:
+            messagebox.showinfo("情報", "すでにフォルダ監視が実行中です。")
+            return
+        
+        # フォルダ監視の設定
+        try:
+            self.update_status("🔄 フォルダ監視を初期化中...")
+            
+            # フォルダ監視の設定ファイルを生成
+            watcher_config = {
+                "input_directory": watch_dir,
+                "supported_extensions": [
+                    ".mp3", ".mp4", ".wav", ".m4a", ".avi", ".mov", ".wmv", ".flac"
+                ]
+            }
+            
+            # auto_transcriber用の設定ファイルを生成
+            auto_transcriber_config = {
+                "input_directory": watch_dir,
+                "output_directory": self.output_dir_var.get(),
+                "supported_extensions": [
+                    ".mp3", ".mp4", ".wav", ".m4a", ".avi", ".mov", ".wmv", ".flac"
+                ]
+            }
+            
+            # 設定ファイルディレクトリの存在確認
+            config_dir = self.watcher_config_path.parent
+            if not config_dir.exists():
+                config_dir.mkdir(parents=True, exist_ok=True)
+            
+            # 設定ファイルの保存
+            with open(self.watcher_config_path, "w", encoding="utf-8") as f:
+                json.dump(watcher_config, f, ensure_ascii=False, indent=4)
+            
+            with open(self.auto_transcriber_config_path, "w", encoding="utf-8") as f:
+                json.dump(auto_transcriber_config, f, ensure_ascii=False, indent=4)
+            
+            # FolderWatcherのインスタンス化
+            self.folder_watcher = FolderWatcher(str(self.watcher_config_path))
+            
+            # コールバック関数の設定
+            self.folder_watcher.set_callback(self.process_watched_file)
+            
+            # 監視開始
+            if self.folder_watcher.start():
+                self.watcher_enabled = True
+                self.watch_status_var.set("監視中 ✅")
+                self.start_watch_button.config(state=tk.DISABLED)
+                self.stop_watch_button.config(state=tk.NORMAL)
+                self.update_status(f"🚀 フォルダ '{watch_dir}' の監視を開始しました。")
+            else:
+                self.update_status("❌ フォルダ監視の開始に失敗しました。")
+        
+        except Exception as e:
+            self.update_status(f"❌ フォルダ監視の初期化中にエラーが発生しました: {e}")
+            if self.folder_watcher:
+                self.folder_watcher.stop()
+                self.folder_watcher = None
+            self.watcher_enabled = False
+            messagebox.showerror("エラー", f"フォルダ監視の開始に失敗しました: {e}")
+    
+    def stop_folder_watcher(self):
+        """フォルダ監視を停止"""
+        if self.folder_watcher and self.watcher_enabled:
+            try:
+                self.folder_watcher.stop()
+                self.folder_watcher = None
+                self.watcher_enabled = False
+                self.watch_status_var.set("停止中")
+                self.start_watch_button.config(state=tk.NORMAL)
+                self.stop_watch_button.config(state=tk.DISABLED)
+                self.update_status("🛑 フォルダ監視を停止しました。")
+            except Exception as e:
+                self.update_status(f"❌ フォルダ監視の停止中にエラーが発生しました: {e}")
+        else:
+            self.update_status("ℹ️ フォルダ監視は実行されていません。")
+    
+    def process_watched_file(self, file_path: str):
+        """監視フォルダから検出されたファイルの処理
+        
+        Args:
+            file_path: 処理するファイルパス
+        """
+        self.update_status(f"🔍 新しいファイルを検出: {os.path.basename(file_path)}")
+        
+        # ファイルをリストに追加
+        if file_path not in self.get_all_files():
+            self.file_listbox.insert(tk.END, file_path)
+            self.update_status(f"📥 ファイル '{os.path.basename(file_path)}' を追加しました。")
+        
+        # 自動処理が有効なら文字起こし処理を開始
+        # 注: この例では自動処理は常に有効
+        if not self.processing_files:
+            self.start_transcription()
+        
+        # 処理完了後の情報をフォルダ監視モジュールに通知
+        # 注: 文字起こし処理は非同期のため、ここでは処理しない
+        # 処理完了はtranscribe_fileメソッド内で行う
 
 
 def main():
     """アプリケーションのエントリーポイント"""
     root = tk.Tk()
     app = KoemojiApp(root)
+    
+    # アプリ終了時のクリーンアップ
+    def on_closing():
+        """アプリケーション終了時の処理"""
+        # フォルダ監視を停止
+        if app.watcher_enabled and app.folder_watcher:
+            app.stop_folder_watcher()
+        
+        # 文字起こし処理をキャンセル
+        if app.processing_files:
+            app.cancel_transcription()
+            
+        # アプリケーションを終了
+        root.destroy()
+    
+    # ウィンドウの閉じるボタンにクリーンアップ処理を割り当て
+    root.protocol("WM_DELETE_WINDOW", on_closing)
+    
     root.mainloop()
 
 
