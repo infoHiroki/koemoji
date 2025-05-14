@@ -51,7 +51,9 @@ DEFAULT_CONFIG = {
     "model_size": "large",  # tiny, base, small, medium, large
     "language": "ja",  # ja, en, auto
     "output_dir": str(Path.home() / "Documents"),
-    "compute_type": "int8"  # float16, float32, int8
+    "compute_type": "int8",  # float16, float32, int8
+    "watch_directory": "",   # 監視フォルダのパス
+    "folder_watch_enabled": False  # フォルダ監視の有効/無効状態
 }
 
 MODEL_SIZES = ["tiny", "base", "small", "medium", "large"]
@@ -97,12 +99,17 @@ class KoemojiApp:
         
         # フォルダ監視関連
         self.folder_watcher = None
-        self.watcher_enabled = False
+        self.watcher_enabled = self.config.get("folder_watch_enabled", False)
         self.watcher_config_path = Path(__file__).parent / "folder_watcher" / "folder_watcher_config.json"
         self.auto_transcriber_config_path = Path(__file__).parent / "folder_watcher" / "auto_transcriber_config.json"
         
         # UI構築
         self.build_ui()
+        
+        # 保存された設定に基づいて自動的に監視を開始（有効になっていた場合）
+        if self.watcher_enabled and self.config.get("watch_directory"):
+            # UIが完全に構築された後で監視を開始するためにafterを使用
+            self.root.after(1000, self.start_folder_watcher)
         
     def center_window(self):
         """ウィンドウを画面中央に配置"""
@@ -148,6 +155,15 @@ class KoemojiApp:
         # メインフレーム
         main_frame = ttk.Frame(self.root, padding="10")
         main_frame.pack(fill=tk.BOTH, expand=True)
+
+        # タイトルと説明
+        title_frame = ttk.Frame(main_frame)
+        title_frame.pack(fill=tk.X, pady=5)
+        
+        ttk.Label(title_frame, text="Koemoji - シンプル文字起こしツール", font=("", 16, "bold")).pack(side=tk.TOP, anchor=tk.W)
+        ttk.Label(title_frame, text="音声/動画ファイルから文字起こしを簡単に行うツール").pack(side=tk.TOP, anchor=tk.W)
+        
+        ttk.Separator(main_frame, orient=tk.HORIZONTAL).pack(fill=tk.X, pady=10)
 
         # ファイル選択セクション
         file_frame = ttk.LabelFrame(main_frame, text="ファイル選択", padding="10")
@@ -219,9 +235,13 @@ class KoemojiApp:
         
         # 監視ディレクトリ選択
         ttk.Label(watcher_frame, text="監視フォルダ:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
-        self.watch_dir_var = tk.StringVar(value="")
-        ttk.Entry(watcher_frame, textvariable=self.watch_dir_var, width=50).grid(row=0, column=1, columnspan=2, sticky=tk.EW, padx=5, pady=5)
+        self.watch_dir_var = tk.StringVar(value=self.config.get("watch_directory", ""))
+        watch_dir_entry = ttk.Entry(watcher_frame, textvariable=self.watch_dir_var, width=50)
+        watch_dir_entry.grid(row=0, column=1, columnspan=2, sticky=tk.EW, padx=5, pady=5)
         ttk.Button(watcher_frame, text="📂 選択...", command=self.browse_watch_dir).grid(row=0, column=3, sticky=tk.W, padx=5, pady=5)
+        
+        # 変更時に設定を保存
+        self.watch_dir_var.trace_add("write", lambda name, index, mode: self.update_config("watch_directory", self.watch_dir_var.get()))
         
         # 監視状態インジケータ
         ttk.Label(watcher_frame, text="監視状態:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
@@ -706,6 +726,9 @@ class KoemojiApp:
                 self.start_watch_button.config(state=tk.DISABLED)
                 self.stop_watch_button.config(state=tk.NORMAL)
                 self.update_status(f"🚀 フォルダ '{watch_dir}' の監視を開始しました。")
+                
+                # 設定を保存
+                self.update_config("folder_watch_enabled", True)
             else:
                 self.update_status("❌ フォルダ監視の開始に失敗しました。")
         
@@ -728,6 +751,9 @@ class KoemojiApp:
                 self.start_watch_button.config(state=tk.NORMAL)
                 self.stop_watch_button.config(state=tk.DISABLED)
                 self.update_status("🛑 フォルダ監視を停止しました。")
+                
+                # 設定を保存
+                self.update_config("folder_watch_enabled", False)
             except Exception as e:
                 self.update_status(f"❌ フォルダ監視の停止中にエラーが発生しました: {e}")
         else:
