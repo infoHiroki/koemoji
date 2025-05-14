@@ -597,13 +597,18 @@ class KoemojiApp:
         
         # フォルダ監視モジュールに処理完了を通知（監視から検出されたファイルの場合）
         if self.watcher_enabled and self.folder_watcher:
-            try:
-                self.folder_watcher.mark_file_as_processed(input_file, {
-                    "output_file": output_file,
-                    "status": "success"
-                })
-            except Exception as e:
-                logger.error(f"フォルダ監視への処理結果通知エラー: {e}")
+            # メインスレッドではなく別スレッドで実行
+            def mark_as_processed():
+                try:
+                    self.folder_watcher.mark_file_as_processed(input_file, {
+                        "output_file": output_file,
+                        "status": "success"
+                    })
+                except Exception as e:
+                    logger.error(f"フォルダ監視への処理結果通知エラー: {e}")
+            
+            # 別スレッドで実行
+            threading.Thread(target=mark_as_processed, daemon=True).start()
 
     def format_time(self, seconds: float) -> str:
         """秒数を[HH:MM:SS.mmm]形式に変換"""
@@ -734,17 +739,22 @@ class KoemojiApp:
         Args:
             file_path: 処理するファイルパス
         """
-        self.update_status(f"🔍 新しいファイルを検出: {os.path.basename(file_path)}")
+        # GUIの更新はメインスレッドで行う必要がある
+        def update_gui():
+            self.update_status(f"🔍 新しいファイルを検出: {os.path.basename(file_path)}")
+            
+            # ファイルをリストに追加
+            if file_path not in self.get_all_files():
+                self.file_listbox.insert(tk.END, file_path)
+                self.update_status(f"📥 ファイル '{os.path.basename(file_path)}' を追加しました。")
+            
+            # 自動処理が有効なら文字起こし処理を開始
+            # 注: この例では自動処理は常に有効
+            if not self.processing_files:
+                self.start_transcription()
         
-        # ファイルをリストに追加
-        if file_path not in self.get_all_files():
-            self.file_listbox.insert(tk.END, file_path)
-            self.update_status(f"📥 ファイル '{os.path.basename(file_path)}' を追加しました。")
-        
-        # 自動処理が有効なら文字起こし処理を開始
-        # 注: この例では自動処理は常に有効
-        if not self.processing_files:
-            self.start_transcription()
+        # メインスレッドでGUIを更新
+        self.root.after(0, update_gui)
         
         # 処理完了後の情報をフォルダ監視モジュールに通知
         # 注: 文字起こし処理は非同期のため、ここでは処理しない
